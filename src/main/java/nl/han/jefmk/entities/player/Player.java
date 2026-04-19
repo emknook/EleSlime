@@ -6,7 +6,6 @@ import com.github.hanyaeger.api.entities.Collider;
 import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.DynamicCompositeEntity;
 import com.github.hanyaeger.api.entities.Newtonian;
-import com.github.hanyaeger.api.entities.impl.SpriteEntity;
 import com.github.hanyaeger.api.userinput.KeyListener;
 import javafx.scene.input.KeyCode;
 
@@ -30,7 +29,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
 
     public Player(final Coordinate2D initialLocation) {
         super(initialLocation);
-        setGravityConstant(GRAVITY);
     }
 
     @Override
@@ -44,44 +42,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
 
     @Override
     public void onPressedKeysChange(Set<KeyCode> pressedKeys) {
-        int horizontalDirection = 0;
-        int verticalDirection = 0;
-
-        if (pressedKeys.contains(KeyCode.LEFT)) {
-            horizontalDirection -= 1;
-        }
-        if (pressedKeys.contains(KeyCode.RIGHT)) {
-            horizontalDirection += 1;
-        }
-        if (pressedKeys.contains(KeyCode.UP)) {
-            verticalDirection -= 1;
-        }
-        if (pressedKeys.contains(KeyCode.DOWN)) {
-            verticalDirection += 1;
-        }
-
-        // No movement
-        if (horizontalDirection == 0 && verticalDirection == 0) {
-            setSpeed(0);
-            return;
-        }
-
-        double angleInDegrees = Math.toDegrees(Math.atan2(horizontalDirection, -verticalDirection));
-        setMotion(3, angleInDegrees);
-    }
-
-    private void applyInputMovement() {
-        if (currentPressedKeys.contains(KeyCode.SPACE) && attachedSurfaceDirection != null) {
-            jumpAwayFromSurface();
-            return;
-        }
-
-        switch (attachedSurfaceDirection) {
-            case null -> handleAirMovement(currentPressedKeys);
-            case DOWN, UP -> handleHorizontalSurfaceMovement(currentPressedKeys);
-            case LEFT, RIGHT -> handleVerticalSurfaceMovement(currentPressedKeys);
-            default -> {}
-        }
+        currentPressedKeys.clear();
+        currentPressedKeys.addAll(pressedKeys);
     }
 
     private void handleAirMovement(final Set<KeyCode> pressedKeys) {
@@ -102,7 +64,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
         } else if (pressedKeys.contains(KeyCode.RIGHT)) {
             horizontalSpeed = SURFACE_MOVEMENT_SPEED;
         }
-
         verticalSpeed = 0;
     }
 
@@ -126,7 +87,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
             case RIGHT -> horizontalSpeed = -JUMP_SPEED;
             default -> {}
         }
-
         attachedSurfaceDirection = null;
     }
 
@@ -134,29 +94,54 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
         touchingSurfaceDirections.add(direction);
     }
 
-    public void clearTouchingSurfaceDirections() {
-        touchingSurfaceDirections.clear();
-    }
-
     public void updateAttachedSurface() {
-        if (touchingSurfaceDirections.contains(Direction.DOWN)) {
+        if (touchingSurfaceDirections.contains(Direction.DOWN) && currentPressedKeys.contains(KeyCode.DOWN)) {
             attachedSurfaceDirection = Direction.DOWN;
-        } else if (touchingSurfaceDirections.contains(Direction.LEFT)) {
+        } else if (touchingSurfaceDirections.contains(Direction.LEFT) && currentPressedKeys.contains(KeyCode.LEFT)) {
             attachedSurfaceDirection = Direction.LEFT;
-        } else if (touchingSurfaceDirections.contains(Direction.RIGHT)) {
+        } else if (touchingSurfaceDirections.contains(Direction.RIGHT) && currentPressedKeys.contains(KeyCode.RIGHT)) {
             attachedSurfaceDirection = Direction.RIGHT;
-        } else if (touchingSurfaceDirections.contains(Direction.UP)) {
+        } else if (touchingSurfaceDirections.contains(Direction.UP) && currentPressedKeys.contains(KeyCode.UP)) {
             attachedSurfaceDirection = Direction.UP;
-        } else {
-            attachedSurfaceDirection = null;
         }
     }
 
-    public void setHorizontalSpeed(double horizontalSpeed) {
-        this.horizontalSpeed = horizontalSpeed;
+    private void applyInputMovement() {
+        if (currentPressedKeys.contains(KeyCode.SPACE) && attachedSurfaceDirection != null) {
+            jumpAwayFromSurface();
+            return;
+        }
+
+        switch (attachedSurfaceDirection) {
+            case null -> handleAirMovement(currentPressedKeys);
+            case DOWN, UP -> handleHorizontalSurfaceMovement(currentPressedKeys);
+            case LEFT, RIGHT -> handleVerticalSurfaceMovement(currentPressedKeys);
+            default -> {}
+        }
     }
 
-    public void setVerticalSpeed(double verticalSpeed) {
-        this.verticalSpeed = verticalSpeed;
+    @Override
+    public void update(long timestamp) {
+        updateAttachedSurface();
+        applyInputMovement();
+
+        if (attachedSurfaceDirection == null) {
+            if (touchingSurfaceDirections.contains(Direction.DOWN)) {
+                attachedSurfaceDirection =  Direction.DOWN;
+            } else {
+                verticalSpeed += GRAVITY;
+            }
+        }
+
+        setAnchorLocation(new Coordinate2D(
+                getAnchorLocation().getX() + horizontalSpeed,
+                getAnchorLocation().getY() + verticalSpeed
+        ));
+
+        clearTouchingSurfaceDirections();
+    }
+
+    public void clearTouchingSurfaceDirections() {
+        touchingSurfaceDirections.clear();
     }
 }

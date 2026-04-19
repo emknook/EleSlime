@@ -6,7 +6,10 @@ import com.github.hanyaeger.api.entities.Collider;
 import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.impl.CircleEntity;
 import javafx.scene.paint.Color;
+import nl.han.jefmk.entities.obstacles.Obstacle;
+import nl.han.jefmk.entities.pickups.Pickup;
 import nl.han.jefmk.surfaces.Tile;
+import nl.han.jefmk.surfaces.TileType;
 
 import java.util.List;
 
@@ -23,57 +26,60 @@ public class PlayerCollider extends CircleEntity implements Collided {
     @Override
     public void onCollision(List<Collider> collidingObjects) {
         for (Collider collider : collidingObjects) {
-            if (!(collider instanceof Tile tile)) {
-                continue;
+            if (collider instanceof Tile) {
+                handleTileCollision((Tile) collider);
             }
-
-            Direction touchingDirection = determineTouchingDirection(tile);
-
-            if (touchingDirection == null) {
-                continue;
+            if (collider instanceof Obstacle) {
+                handleObstacleCollision((Obstacle) collider);
             }
-
-            pushPlayerOutOfTile(tile, touchingDirection);
-            player.addTouchingSurfaceDirection(touchingDirection);
+            if  (collider instanceof Pickup) {
+                handlePickupCollision((Pickup) collider);
+            }
         }
     }
 
-    private Direction determineTouchingDirection(Tile tile) {
-        double playerCenterX = player.getAnchorLocation().getX() + (player.getWidth() / 2);
-        double playerCenterY = player.getAnchorLocation().getY() + (player.getHeight() / 2);
-
-        double tileCenterX = tile.getAnchorLocation().getX() + (tile.getWidth() / 2);
-        double tileCenterY = tile.getAnchorLocation().getY() + (tile.getHeight() / 2);
-
-        double deltaX = tileCenterX - playerCenterX;
-        double deltaY = tileCenterY - playerCenterY;
-
-        if (deltaX > deltaY) {
-            return deltaX > 0 ? Direction.RIGHT : Direction.LEFT;
-        }
-
-        return deltaY > 0 ? Direction.DOWN : Direction.UP;
-    }
-
-    private void pushPlayerOutOfTile(Tile tile, Direction touchingDirection) {
-        switch (touchingDirection) {
-            case DOWN -> {
-                player.setAnchorLocationY(tile.getAnchorLocation().getY() - player.getHeight());
-                player.setVerticalSpeed(0);
-            }
-            case UP -> {
+    private void handleTileCollision(Tile tile) {
+        switch(tile.getType()) {
+            case TileType.CEILING:
                 player.setAnchorLocationY(tile.getAnchorLocation().getY() + tile.getHeight());
-                player.setVerticalSpeed(0);
-            }
-            case LEFT -> {
+                player.addTouchingSurfaceDirection(Direction.UP);
+                break;
+            case TileType.FLOOR:
+                player.setAnchorLocationY(tile.getAnchorLocation().getY() - player.getHeight());
+                player.addTouchingSurfaceDirection(Direction.DOWN);
+                break;
+            case TileType.WALL_LEFT:
                 player.setAnchorLocationX(tile.getAnchorLocation().getX() + tile.getWidth());
-                player.setHorizontalSpeed(0);
-            }
-            case RIGHT -> {
+                player.addTouchingSurfaceDirection(Direction.LEFT);
+                break;
+            case TileType.WALL_RIGHT:
                 player.setAnchorLocationX(tile.getAnchorLocation().getX() - player.getWidth());
-                player.setHorizontalSpeed(0);
-            }
-            default -> {}
+                player.addTouchingSurfaceDirection(Direction.RIGHT);
+                break;
+            default:
+                handleCornerCollision(tile);
         }
     }
+
+    private void handleCornerCollision(Tile tile) {
+        switch(tile.getType()) {
+            case TileType.CORNER_BOTTOM_LEFT ->
+                System.out.println("Might have to give this a skip because this is difficult, could potentially solve it with 2 separate colliders per block?");
+            case TileType.CORNER_BOTTOM_RIGHT ->
+                System.out.println("Might have to give this a skip because this is difficult, could potentially solve it with 2 separate colliders per block?");
+            case TileType.CORNER_TOP_LEFT ->
+                System.out.println("Might have to give this a skip because this is difficult, could potentially solve it with 2 separate colliders per block?");
+            case TileType.CORNER_TOP_RIGHT ->
+                System.out.println("Might have to give this a skip because this is difficult, could potentially solve it with 2 separate colliders per block?");
+        }
+    }
+
+    private void handleObstacleCollision(Obstacle obstacle) {
+        //damage, sulphur, stalagmite
+    }
+
+    private void handlePickupCollision(Pickup pickup) {
+        //blueshroom, greenshroom
+    }
+
 }
