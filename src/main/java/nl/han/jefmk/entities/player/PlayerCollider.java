@@ -8,8 +8,8 @@ import com.github.hanyaeger.api.entities.impl.CircleEntity;
 import javafx.scene.paint.Color;
 import nl.han.jefmk.entities.obstacles.Obstacle;
 import nl.han.jefmk.entities.pickups.Pickup;
+import nl.han.jefmk.surfaces.SurfaceCollider;
 import nl.han.jefmk.surfaces.Tile;
-import nl.han.jefmk.surfaces.TileType;
 
 import java.util.List;
 
@@ -26,8 +26,8 @@ public class PlayerCollider extends CircleEntity implements Collided {
     @Override
     public void onCollision(List<Collider> collidingObjects) {
         for (Collider collider : collidingObjects) {
-            if (collider instanceof Tile) {
-                handleTileCollision((Tile) collider);
+            if (collider instanceof SurfaceCollider) {
+                handleSurfaceCollision((SurfaceCollider) collider);
             }
             if (collider instanceof Obstacle) {
                 handleObstacleCollision((Obstacle) collider);
@@ -38,39 +38,22 @@ public class PlayerCollider extends CircleEntity implements Collided {
         }
     }
 
-    private void handleTileCollision(Tile tile) {
-        switch(tile.getType()) {
-            case TileType.CEILING:
+    private void handleSurfaceCollision(SurfaceCollider surface) {
+        player.addTouchingSurfaceDirection(surface.getSurfaceDirection());
+        Tile tile = surface.getTile();
+        switch(surface.getSurfaceDirection()) {
+            case Direction.UP:
                 player.setAnchorLocationY(tile.getAnchorLocation().getY() + tile.getHeight());
-                player.addTouchingSurfaceDirection(Direction.UP);
                 break;
-            case TileType.FLOOR:
+            case Direction.DOWN:
                 player.setAnchorLocationY(tile.getAnchorLocation().getY() - player.getHeight());
-                player.addTouchingSurfaceDirection(Direction.DOWN);
                 break;
-            case TileType.WALL_LEFT:
+            case Direction.LEFT:
                 player.setAnchorLocationX(tile.getAnchorLocation().getX() + tile.getWidth());
-                player.addTouchingSurfaceDirection(Direction.LEFT);
                 break;
-            case TileType.WALL_RIGHT:
+            case Direction.RIGHT:
                 player.setAnchorLocationX(tile.getAnchorLocation().getX() - player.getWidth());
-                player.addTouchingSurfaceDirection(Direction.RIGHT);
                 break;
-            default:
-                handleCornerCollision(tile);
-        }
-    }
-
-    private void handleCornerCollision(Tile tile) {
-        switch(tile.getType()) {
-            case TileType.CORNER_BOTTOM_LEFT ->
-                System.out.println("Might have to give this a skip because this is difficult, could potentially solve it with 2 separate colliders per block?");
-            case TileType.CORNER_BOTTOM_RIGHT ->
-                System.out.println("Might have to give this a skip because this is difficult, could potentially solve it with 2 separate colliders per block?");
-            case TileType.CORNER_TOP_LEFT ->
-                System.out.println("Might have to give this a skip because this is difficult, could potentially solve it with 2 separate colliders per block?");
-            case TileType.CORNER_TOP_RIGHT ->
-                System.out.println("Might have to give this a skip because this is difficult, could potentially solve it with 2 separate colliders per block?");
         }
     }
 

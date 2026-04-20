@@ -49,8 +49,10 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
     private void handleAirMovement(final Set<KeyCode> pressedKeys) {
         if (pressedKeys.contains(KeyCode.LEFT)) {
             horizontalSpeed = -AIR_MOVEMENT_SPEED;
+            System.out.println("Pressing left!");
         } else if (pressedKeys.contains(KeyCode.RIGHT)) {
             horizontalSpeed = AIR_MOVEMENT_SPEED;
+            System.out.println("Pressing right!");
         } else {
             horizontalSpeed = 0;
         }
@@ -58,11 +60,12 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
 
     private void handleHorizontalSurfaceMovement(final Set<KeyCode> pressedKeys) {
         horizontalSpeed = 0;
-
         if (pressedKeys.contains(KeyCode.LEFT)) {
             horizontalSpeed = -SURFACE_MOVEMENT_SPEED;
+            System.out.println("Pressing left!");
         } else if (pressedKeys.contains(KeyCode.RIGHT)) {
             horizontalSpeed = SURFACE_MOVEMENT_SPEED;
+            System.out.println("Pressing right!");
         }
         verticalSpeed = 0;
     }
@@ -72,8 +75,10 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
 
         if (pressedKeys.contains(KeyCode.UP)) {
             verticalSpeed = -SURFACE_MOVEMENT_SPEED;
+            System.out.println("Pressing up!");
         } else if (pressedKeys.contains(KeyCode.DOWN)) {
             verticalSpeed = SURFACE_MOVEMENT_SPEED;
+            System.out.println("Pressing down!");
         }
 
         horizontalSpeed = 0;
@@ -95,14 +100,14 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
     }
 
     public void updateAttachedSurface() {
-        if (touchingSurfaceDirections.contains(Direction.DOWN) && currentPressedKeys.contains(KeyCode.DOWN)) {
-            attachedSurfaceDirection = Direction.DOWN;
-        } else if (touchingSurfaceDirections.contains(Direction.LEFT) && currentPressedKeys.contains(KeyCode.LEFT)) {
+        if (touchingSurfaceDirections.contains(Direction.LEFT) && currentPressedKeys.contains(KeyCode.LEFT)) {
             attachedSurfaceDirection = Direction.LEFT;
         } else if (touchingSurfaceDirections.contains(Direction.RIGHT) && currentPressedKeys.contains(KeyCode.RIGHT)) {
             attachedSurfaceDirection = Direction.RIGHT;
         } else if (touchingSurfaceDirections.contains(Direction.UP) && currentPressedKeys.contains(KeyCode.UP)) {
             attachedSurfaceDirection = Direction.UP;
+        } else if (touchingSurfaceDirections.contains(Direction.DOWN)) {
+            attachedSurfaceDirection = Direction.DOWN;
         }
     }
 
@@ -127,12 +132,13 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
 
         if (attachedSurfaceDirection == null) {
             if (touchingSurfaceDirections.contains(Direction.DOWN)) {
-                attachedSurfaceDirection =  Direction.DOWN;
+                attachedSurfaceDirection = Direction.DOWN;
             } else {
                 verticalSpeed += GRAVITY;
             }
         }
 
+        System.out.println("Moving x:" + horizontalSpeed + " y:" + verticalSpeed);
         setAnchorLocation(new Coordinate2D(
                 getAnchorLocation().getX() + horizontalSpeed,
                 getAnchorLocation().getY() + verticalSpeed
@@ -143,5 +149,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
 
     public void clearTouchingSurfaceDirections() {
         touchingSurfaceDirections.clear();
+        attachedSurfaceDirection = null;
     }
 }

@@ -5,6 +5,8 @@ import com.github.hanyaeger.api.YaegerGame;
 import nl.han.jefmk.scenes.GameScene;
 
 public class EleSlime extends YaegerGame {
+    public final static int TILE_SIZE = 100;
+
     public static void main(String[] args) {
         launch(args);
     }
