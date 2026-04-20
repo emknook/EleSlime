@@ -3,6 +3,7 @@ package nl.han.jefmk.scenes;
 import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.scenes.ScrollableDynamicScene;
 import javafx.scene.paint.Color;
+import nl.han.jefmk.entities.decorational.InformationText;
 import nl.han.jefmk.entities.player.Player;
 import nl.han.jefmk.surfaces.Tile;
 import nl.han.jefmk.surfaces.TileType;
@@ -15,8 +16,6 @@ public class ExampleScene extends ScrollableDynamicScene {
 
     @Override
     public void setupEntities() {
-        addEntity(new Player(new Coordinate2D(getViewportWidth() / 2, getViewportHeight() / 2 - 100)));
-
         addEntity(new Tile(new Coordinate2D(getViewportWidth()/2,getViewportHeight() / 2), TileType.FLOOR));
         addEntity(new Tile(new Coordinate2D(getViewportWidth()/2,getViewportHeight() / 2 - 400), TileType.CEILING));
         addEntity(new Tile(new Coordinate2D(getViewportWidth()/2 - 200, getViewportHeight() / 2 - 200), TileType.WALL_LEFT));
@@ -34,6 +33,8 @@ public class ExampleScene extends ScrollableDynamicScene {
         addEntity(new Tile(new Coordinate2D(getViewportWidth()/2 - 200,getViewportHeight() / 2 - 100), TileType.INNER_CORNER_BOTTOM_LEFT));
         addEntity(new Tile(new Coordinate2D(getViewportWidth()/2 - 100,getViewportHeight() / 2), TileType.INNER_CORNER_BOTTOM_LEFT));
 
+        addEntity(new Player(new Coordinate2D(getViewportWidth() / 2, getViewportHeight() / 2 - 100)));
 
+        addEntity(new InformationText(new Coordinate2D(getViewportWidth()/2 + 50,getViewportHeight() / 2 - 200), "Testing grounds"));
     }
 }
