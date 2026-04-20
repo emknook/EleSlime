@@ -33,9 +33,12 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
 
     @Override
     protected void setupEntities() {
-        double bodyRadius = 20d;
+        double bodyRadius = 40d;
         Size spriteSize = new Size(bodyRadius * 2);
+        double stickyRadius = bodyRadius * 1.04;
+        double stickyOffset = stickyRadius - bodyRadius;
 
+        addEntity(new PlayerStickyCollider(this, stickyRadius, new Coordinate2D(0 - stickyOffset, 0 - stickyOffset)));
         addEntity(new PlayerCollider(this, bodyRadius, new Coordinate2D(0, 0)));
         addEntity(new PlayerSprite(spriteSize, new Coordinate2D(0, 0)));
     }
@@ -137,8 +140,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
                 verticalSpeed += GRAVITY;
             }
         }
-
-        System.out.println("Moving x:" + horizontalSpeed + " y:" + verticalSpeed);
         setAnchorLocation(new Coordinate2D(
                 getAnchorLocation().getX() + horizontalSpeed,
                 getAnchorLocation().getY() + verticalSpeed

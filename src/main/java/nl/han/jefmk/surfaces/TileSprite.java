@@ -17,6 +17,10 @@ public class TileSprite extends SpriteEntity {
             case CORNER_BOTTOM_LEFT ->   this.setCurrentFrameIndex(12);
             case CEILING -> this.setCurrentFrameIndex(13);
             case CORNER_BOTTOM_RIGHT ->  this.setCurrentFrameIndex(14);
+            case INNER_CORNER_TOP_LEFT ->  this.setCurrentFrameIndex(0);
+            case INNER_CORNER_TOP_RIGHT ->  this.setCurrentFrameIndex(1);
+            case INNER_CORNER_BOTTOM_LEFT ->  this.setCurrentFrameIndex(5);
+            case INNER_CORNER_BOTTOM_RIGHT ->  this.setCurrentFrameIndex(6);
         }
     }
 }
