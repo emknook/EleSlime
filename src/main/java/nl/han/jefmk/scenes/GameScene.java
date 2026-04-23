@@ -6,11 +6,10 @@ import javafx.scene.paint.Color;
 public class GameScene extends ScrollableDynamicScene {
     @Override
     public void setupScene() {
-        setBackgroundColor(Color.rgb(63,39,81));
+        setBackgroundColor(Color.rgb(39, 39, 68));
     }
 
     @Override
     public void setupEntities() {
-
     }
 }
