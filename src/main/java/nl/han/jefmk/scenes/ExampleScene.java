@@ -27,7 +27,7 @@ public class ExampleScene extends ScrollableDynamicScene {
         buildRoom(CENTER_X + 800, CENTER_Y - 100, 5, 5);
 
         buildPlatform(CENTER_X + 350, CENTER_Y - 150, 2);
-        buildPlatform(CENTER_X + 550, CENTER_Y - 300, 2);
+        buildPlatform(CENTER_X + 350, CENTER_Y - 300, 2);
 
         addEntity(new Player(new Coordinate2D(CENTER_X, CENTER_Y - TILE_SIZE)));
         addEntity(new InformationText(new Coordinate2D(CENTER_X + 50, CENTER_Y - 300), "Testing grounds"));
@@ -49,17 +49,13 @@ public class ExampleScene extends ScrollableDynamicScene {
             addTile(left + column * TILE_SIZE, top, TileType.CEILING);
         }
 
-        // Linkermuur — binnenhoeken vervangen de eerste en laatste muurtegel
-        addTile(left, top    + TILE_SIZE, TileType.INNER_CORNER_TOP_LEFT);
-        addTile(left, bottom - TILE_SIZE, TileType.INNER_CORNER_BOTTOM_LEFT);
-        for (int row = 2; row < height - 2; row++) {
+        // Linkermuur
+        for (int row = 1; row < height - 1; row++) {
             addTile(left, top + row * TILE_SIZE, TileType.WALL_LEFT);
         }
 
-        // Rechtermuur — binnenhoeken vervangen de eerste en laatste muurtegel
-        addTile(right, top    + TILE_SIZE, TileType.INNER_CORNER_TOP_RIGHT);
-        addTile(right, bottom - TILE_SIZE, TileType.INNER_CORNER_BOTTOM_RIGHT);
-        for (int row = 2; row < height - 2; row++) {
+        // Rechtermuur
+        for (int row = 1; row < height - 1; row++) {
             addTile(right, top + row * TILE_SIZE, TileType.WALL_RIGHT);
         }
 

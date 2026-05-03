@@ -14,6 +14,10 @@ public class Tile extends CompositeEntity {
         this.type = type;
     }
 
+    public TileType getType() {
+        return type;
+    }
+
     @Override
     protected void setupEntities() {
         Coordinate2D thisLocation = new Coordinate2D(0, 0);

@@ -9,13 +9,15 @@ import com.github.hanyaeger.api.userinput.KeyListener;
 import javafx.scene.input.KeyCode;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class Player extends DynamicCompositeEntity implements KeyListener, Collider {
 
-    private static final double AIR_MOVEMENT_SPEED = 180d;    // px/s
-    private static final double SURFACE_MOVEMENT_SPEED = 240d; // px/s
-    private static final double JUMP_SPEED = 600d;             // px/s
+    private static final double AIR_MOVEMENT_SPEED = 400d;    // px/s
+    private static final double SURFACE_MOVEMENT_SPEED = 400d; // px/s
+    private static final double JUMP_SPEED = 850d;             // px/s
     private static final double GRAVITY = 2880d;               // px/s²
     private static final double MAX_DELTA = 1.0 / 20.0;       // clamp to 20 fps minimum
 
@@ -29,8 +31,25 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private double horizontalSpeed = 0d;
     private double verticalSpeed = 0d;
 
+    private Consumer<Coordinate2D> positionListener;
+    private Consumer<String> debugListener;
+    // Populated each frame by PlayerCollider; cleared at end of update
+    private final Set<String> collidingTileDescriptions = new LinkedHashSet<>();
+
     public Player(final Coordinate2D initialLocation) {
         super(initialLocation);
+    }
+
+    public void setPositionListener(Consumer<Coordinate2D> listener) {
+        this.positionListener = listener;
+    }
+
+    public void setDebugListener(Consumer<String> listener) {
+        this.debugListener = listener;
+    }
+
+    public void addCollidingTile(String description) {
+        collidingTileDescriptions.add(description);
     }
 
     @Override
@@ -148,10 +167,26 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
                 getAnchorLocation().getY() + verticalSpeed * dt
         ));
 
+        if (positionListener != null) {
+            positionListener.accept(getAnchorLocation());
+        }
+
+        if (debugListener != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("attached : ").append(attachedSurfaceDirection).append("\n");
+            sb.append("touching : ").append(touchingSurfaceDirections).append("\n");
+            if (!collidingTileDescriptions.isEmpty()) {
+                sb.append("collisions:\n");
+                collidingTileDescriptions.forEach(d -> sb.append("  ").append(d).append("\n"));
+            }
+            debugListener.accept(sb.toString());
+        }
+
         clearTouchingSurfaceDirections();
     }
 
     public void clearTouchingSurfaceDirections() {
         touchingSurfaceDirections.clear();
+        collidingTileDescriptions.clear();
     }
 }
