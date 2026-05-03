@@ -21,22 +21,11 @@ public class EleSlime extends YaegerGame {
     public final static boolean DEBUG = true;
     public final static int TILE_SIZE = 100;
 
-    // Scene is 12000px tall; Y_OFFSET is the pixel position of grid-row 0.
-    // This gives us 6000px above (negative grid Y) and 6000 below (positive grid Y).
+    // Used to roughly offset the world so we have more space above
     public final static int Y_OFFSET = 6000;
 
     public static void main(String[] args) {
-        launch(withDefaultYaegerArgs(args));
-    }
-
-    private static String[] withDefaultYaegerArgs(String[] args) {
-        if (Arrays.asList(args).contains("--enableScroll")) {
-            return args;
-        }
-
-        String[] launchArgs = Arrays.copyOf(args, args.length + 1);
-        launchArgs[args.length] = "--enableScroll";
-        return launchArgs;
+        launch(args);
     }
 
     @Override
@@ -51,6 +40,7 @@ public class EleSlime extends YaegerGame {
     @Override
     public void setupScenes() {
         addScene(0, new LevelSelectScene(selection -> {
+            // Using JavaFX Platform.runLater() so it runs after everything is done iterating and java doesn't get mad.
             Platform.runLater(() -> {
                 if (selection.startsWith("edit:")) {
                     String levelName = selection.substring(5);
