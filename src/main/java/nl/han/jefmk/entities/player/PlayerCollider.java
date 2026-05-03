@@ -7,6 +7,8 @@ import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.impl.CircleEntity;
 import javafx.scene.paint.Color;
 import nl.han.jefmk.EleSlime;
+import nl.han.jefmk.entities.mobs.EnemySlime;
+import nl.han.jefmk.entities.mobs.Slime;
 import nl.han.jefmk.entities.obstacles.Obstacle;
 import nl.han.jefmk.entities.pickups.Pickup;
 import nl.han.jefmk.surfaces.SurfaceCollider;
@@ -55,6 +57,9 @@ public class PlayerCollider extends CircleEntity implements Collided {
                     handleSurfaceCollision(surface);
                 }
             }
+            if (collider instanceof Slime) {
+                handleSlimeCollision((Slime) collider);
+            }
         }
     }
 
@@ -76,6 +81,12 @@ public class PlayerCollider extends CircleEntity implements Collided {
             case Direction.RIGHT:
                 player.setAnchorLocationX(tile.getAnchorLocation().getX() - player.getWidth());
                 break;
+        }
+    }
+
+    private void handleSlimeCollision(Slime slime) {
+        if (slime instanceof EnemySlime) {
+            player.takeDamage();
         }
     }
 

@@ -13,7 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class Player extends DynamicCompositeEntity implements KeyListener, Collider {
+public class Player extends DynamicCompositeEntity implements KeyListener, Newtonian, Collider {
 
     private static final double AIR_MOVEMENT_SPEED = 400d;    // px/s
     private static final double SURFACE_MOVEMENT_SPEED = 400d; // px/s
@@ -31,6 +31,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private double horizontalSpeed = 0d;
     private double verticalSpeed = 0d;
 
+    private int health;
+
     private Consumer<Coordinate2D> positionListener;
     private Consumer<String> debugListener;
     // Populated each frame by PlayerCollider; cleared at end of update
@@ -38,6 +40,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     public Player(final Coordinate2D initialLocation) {
         super(initialLocation);
+        health = 3;
     }
 
     public void setPositionListener(Consumer<Coordinate2D> listener) {
@@ -122,6 +125,15 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     public void addTouchingSurfaceDirection(Direction direction) {
         touchingSurfaceDirections.add(direction);
+    }
+
+    public void takeDamage() {
+        health--;
+        //teleport at spawn
+    }
+
+    public int getHealth() {
+        return health;
     }
 
     public void updateAttachedSurface() {
