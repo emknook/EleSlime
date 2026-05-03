@@ -13,10 +13,13 @@ import java.util.Set;
 
 public class Player extends DynamicCompositeEntity implements KeyListener, Collider {
 
-    private static final double AIR_MOVEMENT_SPEED = 3d;
-    private static final double SURFACE_MOVEMENT_SPEED = 4d;
-    private static final double JUMP_SPEED = 10d;
-    private static final double GRAVITY = 0.8d;
+    private static final double AIR_MOVEMENT_SPEED = 180d;    // px/s
+    private static final double SURFACE_MOVEMENT_SPEED = 240d; // px/s
+    private static final double JUMP_SPEED = 600d;             // px/s
+    private static final double GRAVITY = 2880d;               // px/s²
+    private static final double MAX_DELTA = 1.0 / 20.0;       // clamp to 20 fps minimum
+
+    private long lastTimestamp = -1;
 
     private final Set<Direction> touchingSurfaceDirections = new HashSet<>();
     private final Set<KeyCode> currentPressedKeys = new HashSet<>();
@@ -121,21 +124,28 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         }
     }
 
-    private void applyGravity() {
+    private void applyGravity(double dt) {
         if (attachedSurfaceDirection == null) {
-            verticalSpeed += GRAVITY;
+            verticalSpeed += GRAVITY * dt;
         }
     }
 
     @Override
     public void update(long timestamp) {
+        if (lastTimestamp < 0) {
+            lastTimestamp = timestamp;
+            return;
+        }
+        double dt = Math.min((timestamp - lastTimestamp) / 1_000_000_000.0, MAX_DELTA);
+        lastTimestamp = timestamp;
+
         updateAttachedSurface();
         applyInputMovement();
-        applyGravity();
+        applyGravity(dt);
 
         setAnchorLocation(new Coordinate2D(
-                getAnchorLocation().getX() + horizontalSpeed,
-                getAnchorLocation().getY() + verticalSpeed
+                getAnchorLocation().getX() + horizontalSpeed * dt,
+                getAnchorLocation().getY() + verticalSpeed * dt
         ));
 
         clearTouchingSurfaceDirections();
