@@ -91,6 +91,14 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     @Override
     public void setupEntities() {
         loadExistingLevel();
+        // Expand world to fit all tiles/pickups that were loaded from disk
+        for (TileEntry tile : tileEntries) {
+            expandWorldIfNeeded(tile.getGridX(), tile.getGridY());
+        }
+        for (PickupEntry pickup : pickupEntries) {
+            expandWorldIfNeeded(pickup.getGridX(), pickup.getGridY());
+        }
+        expandWorldIfNeeded(spawn.getGridX(), spawn.getGridY());
         levelBuilder.buildFromData(toLevelData(), this::addPlacedEntity, this::addEntity);
         setupUI();
         setupGhosts();
@@ -278,7 +286,16 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         double neededW = Math.max(getWidth(), gridX * TILE_SIZE + WORLD_MARGIN);
         double neededH = Math.max(getHeight(), EleSlime.Y_OFFSET + gridY * TILE_SIZE + WORLD_MARGIN);
         if (neededW > getWidth() || neededH > getHeight()) {
+            // Preserve pixel scroll offset so the viewport doesn't drift as the world grows
+            double scrollableW = getWidth() - getViewportWidth();
+            double scrollableH = getHeight() - getViewportHeight();
+            double pixelX = scrollableW > 0 ? getHorizontalRelativeScrollPosition() * scrollableW : 0;
+            double pixelY = scrollableH > 0 ? getVerticalRelativeScrollPosition() * scrollableH : 0;
             setSize(new Size(neededW, neededH));
+            double newScrollableW = neededW - getViewportWidth();
+            double newScrollableH = neededH - getViewportHeight();
+            if (newScrollableW > 0) setHorizontalRelativeScrollPosition(pixelX / newScrollableW);
+            if (newScrollableH > 0) setVerticalRelativeScrollPosition(pixelY / newScrollableH);
         }
     }
 

@@ -15,6 +15,8 @@ import nl.han.jefmk.levels.LevelBuilder;
 import nl.han.jefmk.levels.LevelLoader;
 import nl.han.jefmk.levels.LevelRegistry;
 import nl.han.jefmk.levels.model.LevelData;
+import nl.han.jefmk.levels.model.PickupEntry;
+import nl.han.jefmk.levels.model.TileEntry;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -51,8 +53,16 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
         LevelData data = loader.load(levelName);
         builder.buildFromData(data, (entry, entity) -> addEntity(entity), this::addEntity);
 
+        int tileSize = data.getTileSize();
+        // Expand the world to fit every placed tile and pickup so nothing is clipped on load
+        for (TileEntry tile : data.getTiles()) {
+            expandWorldIfNeeded(tile.getGridX() * tileSize, EleSlime.Y_OFFSET + tile.getGridY() * tileSize);
+        }
+        for (PickupEntry pickup : data.getPickups()) {
+            expandWorldIfNeeded(pickup.getGridX() * tileSize, EleSlime.Y_OFFSET + pickup.getGridY() * tileSize);
+        }
+
         if (data.getSpawn() != null) {
-            int tileSize = data.getTileSize();
             spawnWorldPos = new Coordinate2D(
                     data.getSpawn().getGridX() * tileSize,
                     EleSlime.Y_OFFSET + data.getSpawn().getGridY() * tileSize
@@ -79,7 +89,16 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
         double neededW = Math.max(getWidth(), worldX + WORLD_MARGIN);
         double neededH = Math.max(getHeight(), worldY + WORLD_MARGIN);
         if (neededW > getWidth() || neededH > getHeight()) {
+            // Preserve pixel scroll offset so the viewport doesn't drift as the world grows
+            double scrollableW = getWidth() - getViewportWidth();
+            double scrollableH = getHeight() - getViewportHeight();
+            double pixelX = scrollableW > 0 ? getHorizontalRelativeScrollPosition() * scrollableW : 0;
+            double pixelY = scrollableH > 0 ? getVerticalRelativeScrollPosition() * scrollableH : 0;
             setSize(new Size(neededW, neededH));
+            double newScrollableW = neededW - getViewportWidth();
+            double newScrollableH = neededH - getViewportHeight();
+            if (newScrollableW > 0) setHorizontalRelativeScrollPosition(pixelX / newScrollableW);
+            if (newScrollableH > 0) setVerticalRelativeScrollPosition(pixelY / newScrollableH);
         }
     }
 

@@ -5,7 +5,6 @@ import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.entities.impl.TextEntity;
 import com.github.hanyaeger.api.scenes.DynamicScene;
 import com.github.hanyaeger.api.userinput.KeyListener;
-import javafx.application.Platform;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -108,7 +107,7 @@ public class LevelSelectScene extends DynamicScene implements KeyListener {
 
     private void selectCurrent(boolean editMode) {
         String prefix = editMode ? "edit:" : "";
-        Platform.runLater(() -> onLevelSelected.accept(prefix + levels.get(selectedIndex).getLevelId()));
+        onLevelSelected.accept(prefix + levels.get(selectedIndex).getLevelId());
     }
 
     private void updateIndicator() {
