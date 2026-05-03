@@ -102,11 +102,20 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     public void jumpAwayFromSurface() {
         switch (attachedSurfaceDirection) {
-            case DOWN -> { verticalSpeed = -JUMP_SPEED; horizontalSpeed = 0; }
-            case UP -> { verticalSpeed = JUMP_SPEED; horizontalSpeed = 0; }
-            case LEFT -> { horizontalSpeed = JUMP_SPEED; verticalSpeed = 0; }
-            case RIGHT -> { horizontalSpeed = -JUMP_SPEED; verticalSpeed = 0; }
-            default -> {}
+            case DOWN -> {
+                verticalSpeed = -JUMP_SPEED;
+            }
+            case UP -> {
+                verticalSpeed = JUMP_SPEED;
+            }
+            case LEFT -> {
+                horizontalSpeed = JUMP_SPEED;
+            }
+            case RIGHT -> {
+                horizontalSpeed = -JUMP_SPEED;
+            }
+            default -> {
+            }
         }
         attachedSurfaceDirection = null;
     }
@@ -139,7 +148,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
             case null -> handleAirMovement(currentPressedKeys);
             case DOWN, UP -> handleHorizontalSurfaceMovement(currentPressedKeys);
             case LEFT, RIGHT -> handleVerticalSurfaceMovement(currentPressedKeys);
-            default -> {}
+            default -> {
+            }
         }
     }
 
