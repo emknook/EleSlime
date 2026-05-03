@@ -12,21 +12,21 @@ public class TileSprite extends SpriteEntity {
 
     private final int frameIndex;
 
-    protected TileSprite(Coordinate2D initialLocation, TileType type) {
+    public TileSprite(Coordinate2D initialLocation, TileType type) {
         super("sprites/tileset.png", initialLocation, new Size(EleSlime.TILE_SIZE), 3, 5);
         frameIndex = switch (type) {
-            case CORNER_TOP_LEFT           -> 0;
-            case CORNER_TOP_RIGHT          -> 1;
-            case INNER_CORNER_TOP_LEFT     -> 2;
+            case INNER_CORNER_TOP_LEFT     -> 0;
+            case INNER_CORNER_TOP_RIGHT    -> 1;
+            case CORNER_TOP_LEFT           -> 2;
             case FLOOR                     -> 3;
-            case INNER_CORNER_TOP_RIGHT    -> 4;
-            case CORNER_BOTTOM_LEFT        -> 5;
-            case CORNER_BOTTOM_RIGHT       -> 6;
-            case WALL_LEFT                 -> 7;
-            case WALL_RIGHT                -> 9;
-            case INNER_CORNER_BOTTOM_LEFT  -> 10;
-            case INNER_CORNER_BOTTOM_RIGHT -> 12;
+            case CORNER_TOP_RIGHT          -> 4;
+            case INNER_CORNER_BOTTOM_LEFT  -> 5;
+            case INNER_CORNER_BOTTOM_RIGHT -> 6;
+            case WALL_RIGHT                -> 7;
+            case WALL_LEFT                 -> 9;
+            case CORNER_BOTTOM_LEFT        -> 12;
             case CEILING                   -> 13;
+            case CORNER_BOTTOM_RIGHT       -> 14;
         };
         this.setCurrentFrameIndex(frameIndex);
     }
