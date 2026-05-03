@@ -5,14 +5,13 @@ import com.github.hanyaeger.api.Size;
 import com.github.hanyaeger.api.entities.Collider;
 import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.DynamicCompositeEntity;
-import com.github.hanyaeger.api.entities.Newtonian;
 import com.github.hanyaeger.api.userinput.KeyListener;
 import javafx.scene.input.KeyCode;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class Player extends DynamicCompositeEntity implements KeyListener, Newtonian, Collider {
+public class Player extends DynamicCompositeEntity implements KeyListener, Collider {
 
     private static final double AIR_MOVEMENT_SPEED = 3d;
     private static final double SURFACE_MOVEMENT_SPEED = 4d;
@@ -52,10 +51,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
     private void handleAirMovement(final Set<KeyCode> pressedKeys) {
         if (pressedKeys.contains(KeyCode.LEFT)) {
             horizontalSpeed = -AIR_MOVEMENT_SPEED;
-            System.out.println("Pressing left!");
         } else if (pressedKeys.contains(KeyCode.RIGHT)) {
             horizontalSpeed = AIR_MOVEMENT_SPEED;
-            System.out.println("Pressing right!");
         } else {
             horizontalSpeed = 0;
         }
@@ -65,34 +62,28 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
         horizontalSpeed = 0;
         if (pressedKeys.contains(KeyCode.LEFT)) {
             horizontalSpeed = -SURFACE_MOVEMENT_SPEED;
-            System.out.println("Pressing left!");
         } else if (pressedKeys.contains(KeyCode.RIGHT)) {
             horizontalSpeed = SURFACE_MOVEMENT_SPEED;
-            System.out.println("Pressing right!");
         }
         verticalSpeed = 0;
     }
 
     private void handleVerticalSurfaceMovement(final Set<KeyCode> pressedKeys) {
         verticalSpeed = 0;
-
         if (pressedKeys.contains(KeyCode.UP)) {
             verticalSpeed = -SURFACE_MOVEMENT_SPEED;
-            System.out.println("Pressing up!");
         } else if (pressedKeys.contains(KeyCode.DOWN)) {
             verticalSpeed = SURFACE_MOVEMENT_SPEED;
-            System.out.println("Pressing down!");
         }
-
         horizontalSpeed = 0;
     }
 
     public void jumpAwayFromSurface() {
         switch (attachedSurfaceDirection) {
-            case DOWN -> verticalSpeed = -JUMP_SPEED;
-            case UP -> verticalSpeed = JUMP_SPEED;
-            case LEFT -> horizontalSpeed = JUMP_SPEED;
-            case RIGHT -> horizontalSpeed = -JUMP_SPEED;
+            case DOWN -> { verticalSpeed = -JUMP_SPEED; horizontalSpeed = 0; }
+            case UP -> { verticalSpeed = JUMP_SPEED; horizontalSpeed = 0; }
+            case LEFT -> { horizontalSpeed = JUMP_SPEED; verticalSpeed = 0; }
+            case RIGHT -> { horizontalSpeed = -JUMP_SPEED; verticalSpeed = 0; }
             default -> {}
         }
         attachedSurfaceDirection = null;
@@ -111,6 +102,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
             attachedSurfaceDirection = Direction.UP;
         } else if (touchingSurfaceDirections.contains(Direction.DOWN)) {
             attachedSurfaceDirection = Direction.DOWN;
+        } else {
+            attachedSurfaceDirection = null;
         }
     }
 
@@ -128,18 +121,18 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
         }
     }
 
+    private void applyGravity() {
+        if (attachedSurfaceDirection == null) {
+            verticalSpeed += GRAVITY;
+        }
+    }
+
     @Override
     public void update(long timestamp) {
         updateAttachedSurface();
         applyInputMovement();
+        applyGravity();
 
-        if (attachedSurfaceDirection == null) {
-            if (touchingSurfaceDirections.contains(Direction.DOWN)) {
-                attachedSurfaceDirection = Direction.DOWN;
-            } else {
-                verticalSpeed += GRAVITY;
-            }
-        }
         setAnchorLocation(new Coordinate2D(
                 getAnchorLocation().getX() + horizontalSpeed,
                 getAnchorLocation().getY() + verticalSpeed
@@ -150,6 +143,5 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
 
     public void clearTouchingSurfaceDirections() {
         touchingSurfaceDirections.clear();
-        attachedSurfaceDirection = null;
     }
 }

@@ -3,24 +3,31 @@ package nl.han.jefmk.surfaces;
 import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.Size;
 import com.github.hanyaeger.api.entities.impl.SpriteEntity;
+import com.github.hanyaeger.api.entities.impl.TextEntity;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import nl.han.jefmk.EleSlime;
 
 public class TileSprite extends SpriteEntity {
+
+    private final int frameIndex;
+
     protected TileSprite(Coordinate2D initialLocation, TileType type) {
         super("sprites/tileset.png", initialLocation, new Size(EleSlime.TILE_SIZE), 3, 5);
-        switch (type) {
-            case CORNER_TOP_LEFT ->  this.setCurrentFrameIndex(2);
-            case FLOOR -> this.setCurrentFrameIndex(3);
-            case CORNER_TOP_RIGHT ->  this.setCurrentFrameIndex(4);
-            case WALL_RIGHT ->  this.setCurrentFrameIndex(7);
-            case WALL_LEFT ->  this.setCurrentFrameIndex(9);
-            case CORNER_BOTTOM_LEFT ->   this.setCurrentFrameIndex(12);
-            case CEILING -> this.setCurrentFrameIndex(13);
-            case CORNER_BOTTOM_RIGHT ->  this.setCurrentFrameIndex(14);
-            case INNER_CORNER_TOP_LEFT ->  this.setCurrentFrameIndex(0);
-            case INNER_CORNER_TOP_RIGHT ->  this.setCurrentFrameIndex(1);
-            case INNER_CORNER_BOTTOM_LEFT ->  this.setCurrentFrameIndex(5);
-            case INNER_CORNER_BOTTOM_RIGHT ->  this.setCurrentFrameIndex(6);
-        }
+        frameIndex = switch (type) {
+            case CORNER_TOP_LEFT           -> 0;
+            case CORNER_TOP_RIGHT          -> 1;
+            case INNER_CORNER_TOP_LEFT     -> 2;
+            case FLOOR                     -> 3;
+            case INNER_CORNER_TOP_RIGHT    -> 4;
+            case CORNER_BOTTOM_LEFT        -> 5;
+            case CORNER_BOTTOM_RIGHT       -> 6;
+            case WALL_LEFT                 -> 7;
+            case WALL_RIGHT                -> 9;
+            case INNER_CORNER_BOTTOM_LEFT  -> 10;
+            case INNER_CORNER_BOTTOM_RIGHT -> 12;
+            case CEILING                   -> 13;
+        };
+        this.setCurrentFrameIndex(frameIndex);
     }
 }
