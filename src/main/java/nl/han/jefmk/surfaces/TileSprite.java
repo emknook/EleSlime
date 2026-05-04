@@ -3,9 +3,6 @@ package nl.han.jefmk.surfaces;
 import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.Size;
 import com.github.hanyaeger.api.entities.impl.SpriteEntity;
-import com.github.hanyaeger.api.entities.impl.TextEntity;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import nl.han.jefmk.EleSlime;
 
 public class TileSprite extends SpriteEntity {
@@ -27,6 +24,7 @@ public class TileSprite extends SpriteEntity {
             case CORNER_BOTTOM_LEFT        -> 12;
             case CEILING                   -> 13;
             case CORNER_BOTTOM_RIGHT       -> 14;
+            case WALL_FILLING -> 8;
         };
         this.setCurrentFrameIndex(frameIndex);
     }

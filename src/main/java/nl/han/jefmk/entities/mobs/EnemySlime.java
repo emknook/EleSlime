@@ -17,6 +17,8 @@ public class EnemySlime extends Slime implements TimerContainer {
 
     private State state = State.IDLE_LEFT;
 
+    private int xLocation = 0;
+
     private enum State {
         IDLE_RIGHT,
         IDLE_LEFT,
@@ -44,6 +46,11 @@ public class EnemySlime extends Slime implements TimerContainer {
     }
 
     public void left() {
+        if (xLocation <= -2) { //only move left 2 times
+            idleLeft();
+            return;
+        }
+        xLocation--;
         addToMotion(3, Direction.LEFT);
         state = State.MOVING_LEFT;
         setAutoCycle(100);
@@ -51,6 +58,11 @@ public class EnemySlime extends Slime implements TimerContainer {
     }
 
     public void right() {
+        if (xLocation >= 2) { //only move right 2 times
+            idleRight();
+            return;
+        }
+        xLocation++;
         addToMotion(3, Direction.RIGHT);
         state = State.MOVING_RIGHT;
         setAutoCycle(100);
@@ -79,7 +91,7 @@ public class EnemySlime extends Slime implements TimerContainer {
                 //if moving right, or idling left, can decide to idle right
                 //if moving left, or idling left, can decide to idle left
                 switch (state) {
-                    case IDLE_LEFT,MOVING_RIGHT:
+                    case IDLE_LEFT, MOVING_RIGHT:
                         idleRight();
                         break;
                     case IDLE_RIGHT, MOVING_LEFT:

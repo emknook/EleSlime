@@ -20,7 +20,8 @@ public class TileRegistrar {
             new TileDefinition("inner_corner_top_left", TileType.INNER_CORNER_TOP_LEFT),
             new TileDefinition("inner_corner_top_right", TileType.INNER_CORNER_TOP_RIGHT),
             new TileDefinition("inner_corner_bottom_left", TileType.INNER_CORNER_BOTTOM_LEFT),
-            new TileDefinition("inner_corner_bottom_right", TileType.INNER_CORNER_BOTTOM_RIGHT)
+            new TileDefinition("inner_corner_bottom_right", TileType.INNER_CORNER_BOTTOM_RIGHT),
+            new TileDefinition("wall_filling", TileType.WALL_FILLING)
     );
 
     private static final List<String> TYPE_IDS = TILE_DEFINITIONS.stream()

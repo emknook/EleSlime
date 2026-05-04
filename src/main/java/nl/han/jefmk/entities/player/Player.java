@@ -7,13 +7,16 @@ import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.DynamicCompositeEntity;
 import com.github.hanyaeger.api.userinput.KeyListener;
 import javafx.scene.input.KeyCode;
+import nl.han.jefmk.EleSlime;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class Player extends DynamicCompositeEntity implements KeyListener, Newtonian, Collider {
+public class Player extends DynamicCompositeEntity implements KeyListener, Collider {
+
+    private Coordinate2D spawn;
 
     private static final double AIR_MOVEMENT_SPEED = 400d;    // px/s
     private static final double SURFACE_MOVEMENT_SPEED = 400d; // px/s
@@ -40,6 +43,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
 
     public Player(final Coordinate2D initialLocation) {
         super(initialLocation);
+        this.spawn = initialLocation;
         health = 3;
     }
 
@@ -57,7 +61,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
 
     @Override
     protected void setupEntities() {
-        double bodyRadius = 40d;
+        double bodyRadius = EleSlime.MOB_SIZE / 2;
         Size spriteSize = new Size(bodyRadius * 2);
         double stickyRadius = bodyRadius * 1.04;
         double stickyOffset = stickyRadius - bodyRadius;
@@ -105,20 +109,11 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
 
     public void jumpAwayFromSurface() {
         switch (attachedSurfaceDirection) {
-            case DOWN -> {
-                verticalSpeed = -JUMP_SPEED;
-            }
-            case UP -> {
-                verticalSpeed = JUMP_SPEED;
-            }
-            case LEFT -> {
-                horizontalSpeed = JUMP_SPEED;
-            }
-            case RIGHT -> {
-                horizontalSpeed = -JUMP_SPEED;
-            }
-            default -> {
-            }
+            case DOWN -> verticalSpeed = -JUMP_SPEED;
+            case UP -> verticalSpeed = JUMP_SPEED;
+            case LEFT -> horizontalSpeed = JUMP_SPEED;
+            case RIGHT -> horizontalSpeed = -JUMP_SPEED;
+            default -> {}
         }
         attachedSurfaceDirection = null;
     }
@@ -129,7 +124,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
 
     public void takeDamage() {
         health--;
-        //teleport at spawn
+        this.setAnchorLocation(new Coordinate2D(spawn.getX(), spawn.getY() - this.getHeight()));
     }
 
     public int getHealth() {
@@ -137,11 +132,11 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
     }
 
     public void updateAttachedSurface() {
-        if (touchingSurfaceDirections.contains(Direction.LEFT) && currentPressedKeys.contains(KeyCode.LEFT)) {
+        if (touchingSurfaceDirections.contains(Direction.LEFT) && (currentPressedKeys.contains(KeyCode.LEFT) || attachedSurfaceDirection == Direction.LEFT) && !currentPressedKeys.contains(KeyCode.RIGHT)) {
             attachedSurfaceDirection = Direction.LEFT;
-        } else if (touchingSurfaceDirections.contains(Direction.RIGHT) && currentPressedKeys.contains(KeyCode.RIGHT)) {
+        } else if (touchingSurfaceDirections.contains(Direction.RIGHT) && (currentPressedKeys.contains(KeyCode.RIGHT) || attachedSurfaceDirection == Direction.RIGHT) && !currentPressedKeys.contains(KeyCode.LEFT)) {
             attachedSurfaceDirection = Direction.RIGHT;
-        } else if (touchingSurfaceDirections.contains(Direction.UP) && currentPressedKeys.contains(KeyCode.UP)) {
+        } else if (touchingSurfaceDirections.contains(Direction.UP) && (currentPressedKeys.contains(KeyCode.UP) || attachedSurfaceDirection == Direction.UP) && !currentPressedKeys.contains(KeyCode.DOWN)) {
             attachedSurfaceDirection = Direction.UP;
         } else if (touchingSurfaceDirections.contains(Direction.DOWN)) {
             attachedSurfaceDirection = Direction.DOWN;

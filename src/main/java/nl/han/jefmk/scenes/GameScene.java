@@ -53,7 +53,7 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
         LevelData data = loader.load(levelName);
         builder.buildFromData(data, (entry, entity) -> addEntity(entity), this::addEntity);
 
-        int tileSize = data.getTileSize();
+        double tileSize = data.getTileSize();
         // Expand the world to fit every placed tile and pickup so nothing is clipped on load
         for (TileEntry tile : data.getTiles()) {
             expandWorldIfNeeded(tile.getGridX() * tileSize, EleSlime.Y_OFFSET + tile.getGridY() * tileSize);
@@ -153,7 +153,7 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
             } else if (playerScreenX > rightBound) {
                 offsetX += (playerScreenX - rightBound);
             }
-            offsetX = Math.max(0, Math.min(scrollableW, offsetX));
+            offsetX = Math.clamp(offsetX, 0, scrollableW);
             setHorizontalRelativeScrollPosition(offsetX / scrollableW);
         }
 
@@ -164,7 +164,7 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
             } else if (playerScreenY > bottomBound) {
                 offsetY += (playerScreenY - bottomBound);
             }
-            offsetY = Math.max(0, Math.min(scrollableH, offsetY));
+            offsetY = Math.clamp(offsetY, 0, scrollableH);
             setVerticalRelativeScrollPosition(offsetY / scrollableH);
         }
     }

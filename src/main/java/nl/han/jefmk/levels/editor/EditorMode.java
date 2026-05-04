@@ -4,5 +4,6 @@ public enum EditorMode {
     TILES,
     PICKUPS,
     TEXT,
-    SPAWN
+    SPAWN,
+    MOBS
 }

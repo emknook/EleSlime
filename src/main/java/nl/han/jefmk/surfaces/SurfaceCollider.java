@@ -9,6 +9,7 @@ import nl.han.jefmk.EleSlime;
 
 public class SurfaceCollider extends RectangleEntity implements Collider {
 
+    private final double COLLISION_MARGIN = 5;
     private final Direction surfaceDirection;
     private final Tile tile;
 
@@ -26,13 +27,18 @@ public class SurfaceCollider extends RectangleEntity implements Collider {
                     Color.YELLOW)
                 : Color.TRANSPARENT);
         switch (surfaceDirection) {
-            case LEFT, RIGHT -> setHeight(EleSlime.TILE_SIZE);
-            case DOWN, UP -> setWidth(EleSlime.TILE_SIZE);
+            case LEFT, RIGHT -> setHeight(EleSlime.TILE_SIZE - COLLISION_MARGIN);
+            case DOWN, UP -> setWidth(EleSlime.TILE_SIZE - COLLISION_MARGIN);
         }
         switch(surfaceDirection) {
             case LEFT -> setAnchorLocationX(initialLocation.getX() + EleSlime.TILE_SIZE);
             case UP -> setAnchorLocationY(initialLocation.getY() + EleSlime.TILE_SIZE);
         }
+        switch (surfaceDirection) {
+            case UP, DOWN -> setAnchorLocationX(this.getAnchorLocation().getX() + COLLISION_MARGIN / 2);
+            case RIGHT, LEFT -> setAnchorLocationY(this.getAnchorLocation().getY() + COLLISION_MARGIN / 2);
+        }
+
     }
 
     public Tile getTile() {

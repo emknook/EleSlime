@@ -4,6 +4,7 @@ import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.Size;
 import com.github.hanyaeger.api.entities.Collided;
 import com.github.hanyaeger.api.entities.Collider;
+import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.Newtonian;
 import com.github.hanyaeger.api.entities.impl.DynamicSpriteEntity;
 import nl.han.jefmk.surfaces.SurfaceCollider;
@@ -27,18 +28,18 @@ public class Mob extends DynamicSpriteEntity implements Newtonian, Collider, Col
 
     private void handleSurfaceCollision(SurfaceCollider surface) {
         Tile tile = surface.getTile();
-        switch (surface.getSurfaceDirection()) {
-            case DOWN:
-                this.setAnchorLocationY(tile.getAnchorLocation().getY() - this.getHeight());
-                break;
-            case UP:
+        switch(surface.getSurfaceDirection()) {
+            case Direction.UP:
                 this.setAnchorLocationY(tile.getAnchorLocation().getY() + tile.getHeight());
                 break;
-            case LEFT:
+            case Direction.DOWN:
+                this.setAnchorLocationY(tile.getAnchorLocation().getY() - this.getHeight());
                 break;
-            case RIGHT:
+            case Direction.LEFT:
+                this.setAnchorLocationX(tile.getAnchorLocation().getX() + tile.getWidth());
                 break;
-            default:
+            case Direction.RIGHT:
+                this.setAnchorLocationX(tile.getAnchorLocation().getX() - this.getWidth());
                 break;
         }
     }

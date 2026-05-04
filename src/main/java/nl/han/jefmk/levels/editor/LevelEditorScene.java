@@ -24,12 +24,8 @@ import nl.han.jefmk.entities.player.PlayerSprite;
 import nl.han.jefmk.levels.LevelBuilder;
 import nl.han.jefmk.levels.LevelLoader;
 import nl.han.jefmk.levels.LevelRegistry;
-import nl.han.jefmk.levels.model.GridEntry;
-import nl.han.jefmk.levels.model.LevelData;
-import nl.han.jefmk.levels.model.PickupEntry;
-import nl.han.jefmk.levels.model.SpawnPoint;
-import nl.han.jefmk.levels.model.TextEntry;
-import nl.han.jefmk.levels.model.TileEntry;
+import nl.han.jefmk.levels.model.*;
+import nl.han.jefmk.levels.registration.MobRegistrar;
 import nl.han.jefmk.levels.registration.PickupRegistrar;
 import nl.han.jefmk.levels.registration.TileRegistrar;
 
@@ -40,14 +36,17 @@ import java.util.*;
 
 public class LevelEditorScene extends ScrollableDynamicScene implements MouseButtonPressedListener, MouseMovedListener {
 
-    private static final int TILE_SIZE = EleSlime.TILE_SIZE;
+    private static final double TILE_SIZE = EleSlime.TILE_SIZE;
     private static final List<String> TILE_TYPE_IDS = TileRegistrar.getTypeIds();
     private static final List<String> PICKUP_TYPE_IDS = PickupRegistrar.getTypeIds();
     private static final List<String> PICKUP_GHOST_SPRITES = PickupRegistrar.getSpriteResources();
+    private static final List<String> MOB_TYPE_IDS = MobRegistrar.getTypeIds();
+    private static final List<String> MOB_GHOST_SPRITES = MobRegistrar.getSpriteResources();
 
     private EditorMode mode = EditorMode.TILES;
     private int currentTileIndex = 0;
     private int currentPickupIndex = 0;
+    private int currentMobIndex = 0;
 
     private final Set<KeyCode> heldKeys = new HashSet<>();
 
@@ -55,6 +54,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     private final List<TileEntry> tileEntries = new ArrayList<>();
     private final List<PickupEntry> pickupEntries = new ArrayList<>();
     private final List<TextEntry> textEntries = new ArrayList<>();
+    private final List<MobEntry> mobEntries = new ArrayList<>();
     private SpawnPoint spawn = new SpawnPoint(1, 1);
     private PlayerSprite spawnMarker;
 
@@ -63,6 +63,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
 
     private GhostPreview tileGhost;
     private GhostPreview[] pickupGhosts;
+    private GhostPreview[] mobGhosts;
     private GhostPreview spawnGhost;
 
     private final String levelName;
@@ -126,8 +127,16 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
             addEntity(pickupGhosts[i]);
         }
 
+        // Mob ghosts
+        mobGhosts = new GhostPreview[MOB_GHOST_SPRITES.size()];
+        for (int i = 0; i < MOB_GHOST_SPRITES.size(); i++) {
+            mobGhosts[i] = new GhostPreview(MOB_GHOST_SPRITES.get(i), origin);
+            mobGhosts[i].setVisible(false);
+            addEntity(mobGhosts[i]);
+        }
+
         // Spawn ghost (green "S" represented as the player sprite)
-        spawnGhost = new GhostPreview("sprites/eleslime-spritesheet.png", origin);
+        spawnGhost = new GhostPreview("sprites/eleslime.png", origin);
         spawnGhost.setVisible(false);
         addEntity(spawnGhost);
 
@@ -182,6 +191,9 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         for (GhostPreview pg : pickupGhosts) {
             pg.updatePosition(lastGridPixel);
         }
+        for (GhostPreview pg : mobGhosts) {
+            pg.updatePosition(lastGridPixel);
+        }
         spawnGhost.updatePosition(spawnDisplayPixel(gridX, gridY));
     }
 
@@ -196,6 +208,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
                 case PICKUPS -> placePickup(gridX, gridY);
                 case TEXT -> placeText(gridX, gridY);
                 case SPAWN -> placeSpawn(gridX, gridY);
+                case MOBS -> placeMob(gridX, gridY);
             }
         } else if (button == MouseButton.SECONDARY) {
             removeTileOrPickup(gridX, gridY);
@@ -226,6 +239,14 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         spawnMarker.setAnchorLocation(spawnDisplayPixel(gridX, gridY));
     }
 
+    private void placeMob(int gridX, int gridY) {
+        removeMobAt(gridX, gridY);
+        expandWorldIfNeeded(gridX, gridY);
+        MobEntry entry = new MobEntry(gridX, gridY, currentMobTypeId());
+        mobEntries.add(entry);
+        addPlacedEntity(entry, levelBuilder.build(entry, TILE_SIZE));
+    }
+
     private void placeText(int gridX, int gridY) {
         TextInputDialog dialog = new TextInputDialog("");
         dialog.setTitle("Place Text");
@@ -253,6 +274,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         removeTileAt(gridX, gridY);
         removePickupAt(gridX, gridY);
         removeTextAt(gridX, gridY);
+        removeMobAt(gridX, gridY);
     }
 
     private void removeTileAt(int gridX, int gridY) {
@@ -268,6 +290,11 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     private void removeTextAt(int gridX, int gridY) {
         removeEntity("text", gridX, gridY);
         textEntries.removeIf(e -> e.getGridX() == gridX && e.getGridY() == gridY);
+    }
+
+    private void removeMobAt(int gridX, int gridY) {
+        removeEntity("mob", gridX, gridY);
+        mobEntries.removeIf(e -> e.getGridX() == gridX && e.getGridY() == gridY);
     }
 
     private void removeEntity(String prefix, int gridX, int gridY) {
@@ -383,6 +410,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         switch (mode) {
             case TILES -> currentTileIndex = Math.floorMod(currentTileIndex + delta, TILE_TYPE_IDS.size());
             case PICKUPS -> currentPickupIndex = Math.floorMod(currentPickupIndex + delta, PICKUP_TYPE_IDS.size());
+            case MOBS -> currentMobIndex = Math.floorMod(currentMobIndex + delta, MOB_TYPE_IDS.size());
             default -> {}
         }
         updateLabels();
@@ -398,6 +426,10 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
             case PICKUPS -> {
                 currentTypeLabel.setText("Pickup: " + currentPickupTypeId());
                 modeLabel.setText("Mode: PICKUPS");
+            }
+            case MOBS -> {
+                currentTypeLabel.setText("Mob: " + currentMobTypeId());
+                modeLabel.setText("Mode: MOBS");
             }
             case TEXT -> {
                 currentTypeLabel.setText("Text: (click to place)");
@@ -416,6 +448,9 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         spawnGhost.setVisible(mode == EditorMode.SPAWN);
         for (int i = 0; i < pickupGhosts.length; i++) {
             pickupGhosts[i].setVisible(mode == EditorMode.PICKUPS && i == currentPickupIndex);
+        }
+        for (int i = 0; i < mobGhosts.length; i++) {
+            mobGhosts[i].setVisible(mode == EditorMode.MOBS && i == currentMobIndex);
         }
         // TEXT mode has no ghost preview
     }
@@ -455,6 +490,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         data.setSpawn(spawn);
         data.setTiles(new ArrayList<>(tileEntries));
         data.setPickups(new ArrayList<>(pickupEntries));
+        data.setMobs(new ArrayList<>(mobEntries));
         data.setTexts(new ArrayList<>(textEntries));
         return data;
     }
@@ -466,6 +502,8 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     private String currentPickupTypeId() {
         return PICKUP_TYPE_IDS.get(currentPickupIndex);
     }
+
+    private String currentMobTypeId() { return MOB_TYPE_IDS.get(currentMobIndex); }
 
     private void addPlacedEntity(GridEntry entry, YaegerEntity entity) {
         String prefix = entry instanceof PickupEntry ? "pickup" : "tile";

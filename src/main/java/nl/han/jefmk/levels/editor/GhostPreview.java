@@ -20,6 +20,7 @@ public class GhostPreview extends DynamicSpriteEntity {
             1,  // inner_corner_top_right
             5,  // inner_corner_bottom_left
             6,  // inner_corner_bottom_right
+            8,  // wall_filling
     };
 
     private final String spriteResource;
