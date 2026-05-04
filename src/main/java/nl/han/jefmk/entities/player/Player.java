@@ -5,19 +5,23 @@ import com.github.hanyaeger.api.Size;
 import com.github.hanyaeger.api.entities.Collider;
 import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.DynamicCompositeEntity;
-import com.github.hanyaeger.api.entities.Newtonian;
 import com.github.hanyaeger.api.userinput.KeyListener;
 import javafx.scene.input.KeyCode;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
-public class Player extends DynamicCompositeEntity implements KeyListener, Newtonian, Collider {
+public class Player extends DynamicCompositeEntity implements KeyListener, Collider {
 
-    private static final double AIR_MOVEMENT_SPEED = 3d;
-    private static final double SURFACE_MOVEMENT_SPEED = 4d;
-    private static final double JUMP_SPEED = 10d;
-    private static final double GRAVITY = 0.8d;
+    private static final double AIR_MOVEMENT_SPEED = 400d;    // px/s
+    private static final double SURFACE_MOVEMENT_SPEED = 400d; // px/s
+    private static final double JUMP_SPEED = 850d;             // px/s
+    private static final double GRAVITY = 2880d;               // px/s²
+    private static final double MAX_DELTA = 1.0 / 20.0;       // clamp to 20 fps minimum
+
+    private long lastTimestamp = -1;
 
     private final Set<Direction> touchingSurfaceDirections = new HashSet<>();
     private final Set<KeyCode> currentPressedKeys = new HashSet<>();
@@ -27,8 +31,25 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
     private double horizontalSpeed = 0d;
     private double verticalSpeed = 0d;
 
+    private Consumer<Coordinate2D> positionListener;
+    private Consumer<String> debugListener;
+    // Populated each frame by PlayerCollider; cleared at end of update
+    private final Set<String> collidingTileDescriptions = new LinkedHashSet<>();
+
     public Player(final Coordinate2D initialLocation) {
         super(initialLocation);
+    }
+
+    public void setPositionListener(Consumer<Coordinate2D> listener) {
+        this.positionListener = listener;
+    }
+
+    public void setDebugListener(Consumer<String> listener) {
+        this.debugListener = listener;
+    }
+
+    public void addCollidingTile(String description) {
+        collidingTileDescriptions.add(description);
     }
 
     @Override
@@ -52,10 +73,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
     private void handleAirMovement(final Set<KeyCode> pressedKeys) {
         if (pressedKeys.contains(KeyCode.LEFT)) {
             horizontalSpeed = -AIR_MOVEMENT_SPEED;
-            System.out.println("Pressing left!");
         } else if (pressedKeys.contains(KeyCode.RIGHT)) {
             horizontalSpeed = AIR_MOVEMENT_SPEED;
-            System.out.println("Pressing right!");
         } else {
             horizontalSpeed = 0;
         }
@@ -65,35 +84,38 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
         horizontalSpeed = 0;
         if (pressedKeys.contains(KeyCode.LEFT)) {
             horizontalSpeed = -SURFACE_MOVEMENT_SPEED;
-            System.out.println("Pressing left!");
         } else if (pressedKeys.contains(KeyCode.RIGHT)) {
             horizontalSpeed = SURFACE_MOVEMENT_SPEED;
-            System.out.println("Pressing right!");
         }
         verticalSpeed = 0;
     }
 
     private void handleVerticalSurfaceMovement(final Set<KeyCode> pressedKeys) {
         verticalSpeed = 0;
-
         if (pressedKeys.contains(KeyCode.UP)) {
             verticalSpeed = -SURFACE_MOVEMENT_SPEED;
-            System.out.println("Pressing up!");
         } else if (pressedKeys.contains(KeyCode.DOWN)) {
             verticalSpeed = SURFACE_MOVEMENT_SPEED;
-            System.out.println("Pressing down!");
         }
-
         horizontalSpeed = 0;
     }
 
     public void jumpAwayFromSurface() {
         switch (attachedSurfaceDirection) {
-            case DOWN -> verticalSpeed = -JUMP_SPEED;
-            case UP -> verticalSpeed = JUMP_SPEED;
-            case LEFT -> horizontalSpeed = JUMP_SPEED;
-            case RIGHT -> horizontalSpeed = -JUMP_SPEED;
-            default -> {}
+            case DOWN -> {
+                verticalSpeed = -JUMP_SPEED;
+            }
+            case UP -> {
+                verticalSpeed = JUMP_SPEED;
+            }
+            case LEFT -> {
+                horizontalSpeed = JUMP_SPEED;
+            }
+            case RIGHT -> {
+                horizontalSpeed = -JUMP_SPEED;
+            }
+            default -> {
+            }
         }
         attachedSurfaceDirection = null;
     }
@@ -111,6 +133,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
             attachedSurfaceDirection = Direction.UP;
         } else if (touchingSurfaceDirections.contains(Direction.DOWN)) {
             attachedSurfaceDirection = Direction.DOWN;
+        } else {
+            attachedSurfaceDirection = null;
         }
     }
 
@@ -124,32 +148,55 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Newto
             case null -> handleAirMovement(currentPressedKeys);
             case DOWN, UP -> handleHorizontalSurfaceMovement(currentPressedKeys);
             case LEFT, RIGHT -> handleVerticalSurfaceMovement(currentPressedKeys);
-            default -> {}
+            default -> {
+            }
+        }
+    }
+
+    private void applyGravity(double dt) {
+        if (attachedSurfaceDirection == null) {
+            verticalSpeed += GRAVITY * dt;
         }
     }
 
     @Override
     public void update(long timestamp) {
+        if (lastTimestamp < 0) {
+            lastTimestamp = timestamp;
+            return;
+        }
+        double dt = Math.min((timestamp - lastTimestamp) / 1_000_000_000.0, MAX_DELTA);
+        lastTimestamp = timestamp;
+
         updateAttachedSurface();
         applyInputMovement();
+        applyGravity(dt);
 
-        if (attachedSurfaceDirection == null) {
-            if (touchingSurfaceDirections.contains(Direction.DOWN)) {
-                attachedSurfaceDirection = Direction.DOWN;
-            } else {
-                verticalSpeed += GRAVITY;
-            }
-        }
         setAnchorLocation(new Coordinate2D(
-                getAnchorLocation().getX() + horizontalSpeed,
-                getAnchorLocation().getY() + verticalSpeed
+                getAnchorLocation().getX() + horizontalSpeed * dt,
+                getAnchorLocation().getY() + verticalSpeed * dt
         ));
+
+        if (positionListener != null) {
+            positionListener.accept(getAnchorLocation());
+        }
+
+        if (debugListener != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("attached : ").append(attachedSurfaceDirection).append("\n");
+            sb.append("touching : ").append(touchingSurfaceDirections).append("\n");
+            if (!collidingTileDescriptions.isEmpty()) {
+                sb.append("collisions:\n");
+                collidingTileDescriptions.forEach(d -> sb.append("  ").append(d).append("\n"));
+            }
+            debugListener.accept(sb.toString());
+        }
 
         clearTouchingSurfaceDirections();
     }
 
     public void clearTouchingSurfaceDirections() {
         touchingSurfaceDirections.clear();
-        attachedSurfaceDirection = null;
+        collidingTileDescriptions.clear();
     }
 }

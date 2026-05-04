@@ -3,11 +3,14 @@ package nl.han.jefmk.entities.player;
 import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.entities.Collided;
 import com.github.hanyaeger.api.entities.Collider;
+import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.impl.CircleEntity;
 import javafx.scene.paint.Color;
 import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.surfaces.SurfaceCollider;
+import nl.han.jefmk.surfaces.Tile;
 
+import java.util.HashSet;
 import java.util.List;
 
 public class PlayerStickyCollider extends CircleEntity implements Collided {
@@ -23,15 +26,28 @@ public class PlayerStickyCollider extends CircleEntity implements Collided {
 
     @Override
     public void onCollision(List<Collider> collidingObjects) {
+        // First pass: register vertical surface contacts and track which tiles provided them.
+        // This prevents a corner tile's horizontal surface from overriding the vertical attachment.
+        HashSet<Tile> verticallyTouched = new HashSet<>();
         for (Collider collider : collidingObjects) {
-            if (collider instanceof SurfaceCollider) {
-                handleSurfaceCollision((SurfaceCollider) collider);
+            if (collider instanceof SurfaceCollider surface) {
+                var dir = surface.getSurfaceDirection();
+                if (dir == Direction.UP || dir == Direction.DOWN) {
+                    player.addTouchingSurfaceDirection(dir);
+                    verticallyTouched.add(surface.getTile());
+                }
             }
         }
-    }
-
-    private void handleSurfaceCollision(SurfaceCollider surface) {
-        player.addTouchingSurfaceDirection(surface.getSurfaceDirection());
+        // Second pass: only register horizontal contacts for tiles not already handled vertically.
+        for (Collider collider : collidingObjects) {
+            if (collider instanceof SurfaceCollider surface) {
+                var dir = surface.getSurfaceDirection();
+                if ((dir == Direction.LEFT || dir == Direction.RIGHT)
+                        && !verticallyTouched.contains(surface.getTile())) {
+                    player.addTouchingSurfaceDirection(dir);
+                }
+            }
+        }
     }
 
 }

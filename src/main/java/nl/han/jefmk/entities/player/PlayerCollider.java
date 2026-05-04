@@ -12,7 +12,9 @@ import nl.han.jefmk.entities.pickups.Pickup;
 import nl.han.jefmk.surfaces.SurfaceCollider;
 import nl.han.jefmk.surfaces.Tile;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class PlayerCollider extends CircleEntity implements Collided {
     private final Player player;
@@ -27,21 +29,40 @@ public class PlayerCollider extends CircleEntity implements Collided {
 
     @Override
     public void onCollision(List<Collider> collidingObjects) {
+        // Resolve vertical surfaces first; track which tiles were vertically resolved so
+        // horizontal surfaces on the same tile (corner tiles) don't incorrectly snap the player sideways.
+        Set<Tile> verticallyResolved = new HashSet<>();
+
         for (Collider collider : collidingObjects) {
-            if (collider instanceof SurfaceCollider) {
-                handleSurfaceCollision((SurfaceCollider) collider);
+            if (collider instanceof SurfaceCollider surface) {
+                Direction dir = surface.getSurfaceDirection();
+                if (dir == Direction.UP || dir == Direction.DOWN) {
+                    handleSurfaceCollision(surface);
+                    verticallyResolved.add(surface.getTile());
+                }
+            } else if (collider instanceof Obstacle obstacle) {
+                handleObstacleCollision(obstacle);
+            } else if (collider instanceof Pickup pickup) {
+                handlePickupCollision(pickup);
             }
-            if (collider instanceof Obstacle) {
-                handleObstacleCollision((Obstacle) collider);
-            }
-            if  (collider instanceof Pickup) {
-                handlePickupCollision((Pickup) collider);
+        }
+
+        for (Collider collider : collidingObjects) {
+            if (collider instanceof SurfaceCollider surface) {
+                Direction dir = surface.getSurfaceDirection();
+                if ((dir == Direction.LEFT || dir == Direction.RIGHT)
+                        && !verticallyResolved.contains(surface.getTile())) {
+                    handleSurfaceCollision(surface);
+                }
             }
         }
     }
 
     private void handleSurfaceCollision(SurfaceCollider surface) {
         Tile tile = surface.getTile();
+        if (EleSlime.DEBUG) {
+            player.addCollidingTile(tile.getType().name() + " ← " + surface.getSurfaceDirection().name());
+        }
         switch(surface.getSurfaceDirection()) {
             case Direction.UP:
                 player.setAnchorLocationY(tile.getAnchorLocation().getY() + tile.getHeight());
