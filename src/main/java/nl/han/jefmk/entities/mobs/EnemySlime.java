@@ -15,16 +15,9 @@ public class EnemySlime extends Slime implements TimerContainer {
     private final Animation leftAnimation = new LoopingAnimation(1, 0, 1, 6);
     private final Animation rightAnimation = new LoopingAnimation(0, 2, 0, 8);
 
-    private State state = State.IDLE_LEFT;
+    private MovingState movingState = MovingState.IDLE_LEFT;
 
     private int xLocation = 0;
-
-    private enum State {
-        IDLE_RIGHT,
-        IDLE_LEFT,
-        MOVING_LEFT,
-        MOVING_RIGHT,
-    }
 
     public EnemySlime(Coordinate2D initialLocation) {
         super("sprites/enemy-spritesheet.png", initialLocation, 2, 9);
@@ -33,14 +26,14 @@ public class EnemySlime extends Slime implements TimerContainer {
 
     public void idleLeft() {
         setMotion(0,0);
-        state = State.IDLE_LEFT;
+        movingState = MovingState.IDLE_LEFT;
         setAutoCycle(300);
         playAnimation(idleLeftAnimation);
     }
 
     public void idleRight() {
         setMotion(0,0);
-        state = State.IDLE_RIGHT;
+        movingState = MovingState.IDLE_RIGHT;
         setAutoCycle(300);
         playAnimation(idleRightAnimation);
     }
@@ -52,7 +45,7 @@ public class EnemySlime extends Slime implements TimerContainer {
         }
         xLocation--;
         addToMotion(3, Direction.LEFT);
-        state = State.MOVING_LEFT;
+        movingState = MovingState.MOVING_LEFT;
         setAutoCycle(100);
         playAnimation(leftAnimation);
     }
@@ -64,7 +57,7 @@ public class EnemySlime extends Slime implements TimerContainer {
         }
         xLocation++;
         addToMotion(3, Direction.RIGHT);
-        state = State.MOVING_RIGHT;
+        movingState = MovingState.MOVING_RIGHT;
         setAutoCycle(100);
         playAnimation(rightAnimation);
     }
@@ -90,7 +83,7 @@ public class EnemySlime extends Slime implements TimerContainer {
             if(changeBehaviourOption < 0.75) {
                 //if moving right, or idling left, can decide to idle right
                 //if moving left, or idling left, can decide to idle left
-                switch (state) {
+                switch (movingState) {
                     case IDLE_LEFT, MOVING_RIGHT:
                         idleRight();
                         break;
@@ -101,7 +94,7 @@ public class EnemySlime extends Slime implements TimerContainer {
             } else {
                 //if moving left, or idling left, can decide to continue left, or start moving left
                 //if moving right, or idling right, can decide to continue right, or start moving right
-                switch (state) {
+                switch (movingState) {
                     case IDLE_LEFT, MOVING_LEFT:
                         left();
                         break;

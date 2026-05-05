@@ -12,6 +12,7 @@ public class FriendlySlime extends Slime {
         super("sprites/friendly-spritesheet.png", initialLocation, 1, 2);
         setAutoCycle(300);
         idleRight();
+        setGravityConstant(0); // a friendly slime is like a decorational sprite, it does not need to move, it just sits there.
     }
 
     public void idleRight() {

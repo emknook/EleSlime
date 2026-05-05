@@ -9,7 +9,6 @@ import nl.han.jefmk.EleSlime;
 
 public class SurfaceCollider extends RectangleEntity implements Collider {
 
-    private final double COLLISION_MARGIN = 5;
     private final Direction surfaceDirection;
     private final Tile tile;
 
@@ -17,28 +16,28 @@ public class SurfaceCollider extends RectangleEntity implements Collider {
         super(initialLocation);
         this.surfaceDirection = surfaceDirection;
         this.tile = tile;
-        setFill(EleSlime.DEBUG ?
-                (surfaceDirection == Direction.LEFT ?
-                    Color.RED :
-                surfaceDirection == Direction.RIGHT ?
-                    Color.GREEN :
-                surfaceDirection == Direction.UP ?
-                    Color.BLUE :
-                    Color.YELLOW)
-                : Color.TRANSPARENT);
+        double collisionMargin = 5; // margin to not have the surfaces overlap within one tile, which may cause confusing behavior
         switch (surfaceDirection) {
-            case LEFT, RIGHT -> setHeight(EleSlime.TILE_SIZE - COLLISION_MARGIN);
-            case DOWN, UP -> setWidth(EleSlime.TILE_SIZE - COLLISION_MARGIN);
+            case LEFT, RIGHT -> setHeight(EleSlime.TILE_SIZE - collisionMargin);
+            case DOWN, UP -> setWidth(EleSlime.TILE_SIZE - collisionMargin);
         }
         switch(surfaceDirection) {
             case LEFT -> setAnchorLocationX(initialLocation.getX() + EleSlime.TILE_SIZE);
             case UP -> setAnchorLocationY(initialLocation.getY() + EleSlime.TILE_SIZE);
         }
         switch (surfaceDirection) {
-            case UP, DOWN -> setAnchorLocationX(this.getAnchorLocation().getX() + COLLISION_MARGIN / 2);
-            case RIGHT, LEFT -> setAnchorLocationY(this.getAnchorLocation().getY() + COLLISION_MARGIN / 2);
+            case UP, DOWN -> setAnchorLocationX(this.getAnchorLocation().getX() + collisionMargin / 2);
+            case RIGHT, LEFT -> setAnchorLocationY(this.getAnchorLocation().getY() + collisionMargin / 2);
         }
-
+        if (EleSlime.DEBUG) {
+            setFill(switch (surfaceDirection) {
+                case DOWN -> Color.RED;
+                case RIGHT -> Color.GREEN;
+                case UP -> Color.YELLOW;
+                case LEFT -> Color.BLUE;
+                default -> Color.TRANSPARENT;
+            });
+        }
     }
 
     public Tile getTile() {

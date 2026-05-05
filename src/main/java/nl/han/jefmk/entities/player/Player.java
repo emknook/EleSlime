@@ -41,6 +41,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     // Populated each frame by PlayerCollider; cleared at end of update
     private final Set<String> collidingTileDescriptions = new LinkedHashSet<>();
 
+    private PlayerSprite playerSprite;
+
     public Player(final Coordinate2D initialLocation) {
         super(initialLocation);
         this.spawn = initialLocation;
@@ -68,7 +70,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
         addEntity(new PlayerStickyCollider(this, stickyRadius, new Coordinate2D(0 - stickyOffset, 0 - stickyOffset)));
         addEntity(new PlayerCollider(this, bodyRadius, new Coordinate2D(0, 0)));
-        addEntity(new PlayerSprite(spriteSize, new Coordinate2D(0, 0)));
+        playerSprite = new PlayerSprite(spriteSize, new Coordinate2D(0, 0));
+        addEntity(playerSprite);
     }
 
     @Override
@@ -115,6 +118,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
             case RIGHT -> horizontalSpeed = -JUMP_SPEED;
             default -> {}
         }
+        playerSprite.jump();
         attachedSurfaceDirection = null;
     }
 
@@ -142,6 +146,16 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
             attachedSurfaceDirection = Direction.DOWN;
         } else {
             attachedSurfaceDirection = null;
+        }
+    }
+
+    public void updateRotationBasedOnAttachedSurface() {
+        switch (attachedSurfaceDirection) {
+            case null -> {}
+            case UP -> playerSprite.setRotate(180);
+            case LEFT -> playerSprite.setRotate(-90);
+            case RIGHT -> playerSprite.setRotate(90);
+            default -> playerSprite.setRotate(0);
         }
     }
 
@@ -176,6 +190,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         lastTimestamp = timestamp;
 
         updateAttachedSurface();
+        updateRotationBasedOnAttachedSurface();
         applyInputMovement();
         applyGravity(dt);
 
@@ -187,6 +202,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         if (positionListener != null) {
             positionListener.accept(getAnchorLocation());
         }
+
+        determineSpriteAnimation();
 
         if (debugListener != null) {
             StringBuilder sb = new StringBuilder();
@@ -200,6 +217,38 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         }
 
         clearTouchingSurfaceDirections();
+    }
+
+    private void determineSpriteAnimation() {
+        if (horizontalSpeed == 0 && verticalSpeed == 0) {
+            playerSprite.setIdle();
+        } else {
+            if (attachedSurfaceDirection == null) {
+                return;
+            }
+            if (horizontalSpeed > 0) {
+                switch (attachedSurfaceDirection) {
+                    case Direction.DOWN -> playerSprite.moveRight();
+                    case Direction.UP -> playerSprite.moveLeft();
+                }
+            } else if (horizontalSpeed < 0) {
+                switch (attachedSurfaceDirection) {
+                    case Direction.DOWN -> playerSprite.moveLeft();
+                    case Direction.UP -> playerSprite.moveRight();
+                }
+            }
+            if (verticalSpeed > 0) {
+                switch (attachedSurfaceDirection) {
+                    case LEFT -> playerSprite.moveRight();
+                    case RIGHT -> playerSprite.moveLeft();
+                }
+            } else {
+                switch (attachedSurfaceDirection) {
+                    case LEFT -> playerSprite.moveLeft();
+                    case RIGHT -> playerSprite.moveRight();
+                }
+            }
+        }
     }
 
     public void clearTouchingSurfaceDirections() {

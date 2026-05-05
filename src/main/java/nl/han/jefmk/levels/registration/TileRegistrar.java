@@ -17,10 +17,10 @@ public class TileRegistrar {
             new TileDefinition("corner_top_right", TileType.CORNER_TOP_RIGHT),
             new TileDefinition("corner_bottom_left", TileType.CORNER_BOTTOM_LEFT),
             new TileDefinition("corner_bottom_right", TileType.CORNER_BOTTOM_RIGHT),
-            new TileDefinition("inner_corner_top_left", TileType.INNER_CORNER_TOP_LEFT),
-            new TileDefinition("inner_corner_top_right", TileType.INNER_CORNER_TOP_RIGHT),
-            new TileDefinition("inner_corner_bottom_left", TileType.INNER_CORNER_BOTTOM_LEFT),
-            new TileDefinition("inner_corner_bottom_right", TileType.INNER_CORNER_BOTTOM_RIGHT),
+            new TileDefinition("inner_corner_top_left", TileType.OUTER_CORNER_TOP_LEFT),
+            new TileDefinition("inner_corner_top_right", TileType.OUTER_CORNER_TOP_RIGHT),
+            new TileDefinition("inner_corner_bottom_left", TileType.OUTER_CORNER_BOTTOM_LEFT),
+            new TileDefinition("inner_corner_bottom_right", TileType.OUTER_CORNER_BOTTOM_RIGHT),
             new TileDefinition("wall_filling", TileType.WALL_FILLING)
     );
 
