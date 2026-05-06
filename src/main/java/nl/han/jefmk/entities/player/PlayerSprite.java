@@ -8,20 +8,27 @@ import nl.han.jefmk.entities.mobs.MovingState;
 
 public class PlayerSprite extends DynamicSpriteEntity {
 
-    private final Animation idleLeftAnimation = new LoopingAnimation(1, 18, 1, 17);
+    private final Animation idleLeftAnimation = new LoopingAnimation(1, 17, 1, 18);
     private final Animation idleRightAnimation = new LoopingAnimation(0, 0, 0, 1);
     private final Animation movingRightAnimation = new LoopingAnimation(0, 12, 0, 18);
     private final Animation movingLeftAnimation = new LoopingAnimation(1, 0, 1, 6);
-    private final Animation jumpingRightAnimation = new LinkedAnimation(0, 2, 0, 12, idleRightAnimation);
-    private final Animation jumpingLeftAnimation = new LinkedAnimation(0, 5, 0, 15, movingLeftAnimation);
+
+
+    private final Animation jumpingRightAnimation;
+    private final Animation jumpingLeftAnimation;
 
     private MovingState movingState = MovingState.IDLE_RIGHT;
+    private boolean isJumping = false;
 
     public PlayerSprite(Size size, Coordinate2D initialLocation) {
         super("sprites/eleslime-spritesheet.png", initialLocation, size, 2, 20);
         setCurrentFrameIndex(0);
         setAutoCycle(300);
         idleRight();
+
+        PlayerJumpCallBack playerJumpCallBack = new  PlayerJumpCallBack(this);
+        jumpingLeftAnimation = new LinkedAnimationWithCallBack(1, 5, 1, 15, idleLeftAnimation, playerJumpCallBack);
+        jumpingRightAnimation = new LinkedAnimationWithCallBack(0, 2, 0, 12, idleRightAnimation, playerJumpCallBack);
     }
 
     public MovingState getMovingState() {
@@ -59,7 +66,18 @@ public class PlayerSprite extends DynamicSpriteEntity {
         movingState = MovingState.MOVING_LEFT;
     }
 
+    public void isNoLongerJumping() {
+        setAutoCycle(300);
+        isJumping = false;
+    }
+
     public void jump() {
+        System.out.println("jump");
+        if (isJumping) {
+            return;
+        }
+        System.out.println("not jumping, but will now start jump");
+        isJumping = true;
         setAutoCycle(100);
         switch (movingState) {
             case MOVING_RIGHT, IDLE_RIGHT -> playAnimation(jumpingRightAnimation);

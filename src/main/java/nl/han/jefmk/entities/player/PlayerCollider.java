@@ -10,6 +10,8 @@ import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.entities.mobs.EnemySlime;
 import nl.han.jefmk.entities.mobs.Slime;
 import nl.han.jefmk.entities.obstacles.Obstacle;
+import nl.han.jefmk.entities.pickups.BlueShroom;
+import nl.han.jefmk.entities.pickups.GreenShroom;
 import nl.han.jefmk.entities.pickups.Pickup;
 import nl.han.jefmk.surfaces.SurfaceCollider;
 import nl.han.jefmk.surfaces.Tile;
@@ -42,8 +44,8 @@ public class PlayerCollider extends CircleEntity implements Collided {
                     handleSurfaceCollision(surface);
                     verticallyResolved.add(surface.getTile());
                 }
-            } else if (collider instanceof Obstacle obstacle) {
-                handleObstacleCollision(obstacle);
+            } else if (collider instanceof Obstacle) {
+                handleObstacleCollision();
             } else if (collider instanceof Pickup pickup) {
                 handlePickupCollision(pickup);
             }
@@ -90,12 +92,16 @@ public class PlayerCollider extends CircleEntity implements Collided {
         }
     }
 
-    private void handleObstacleCollision(Obstacle obstacle) {
-        //damage, sulphur, stalagmite
+    private void handleObstacleCollision() {
+        player.takeDamage();
     }
 
     private void handlePickupCollision(Pickup pickup) {
-        //blueshroom, greenshroom
+        if (pickup instanceof GreenShroom) {
+            player.regainHealth();
+        } else if (pickup instanceof BlueShroom) {
+            player.addScore(100);
+        }
     }
 
 }

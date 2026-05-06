@@ -16,11 +16,11 @@ import java.util.function.Consumer;
 
 public class Player extends DynamicCompositeEntity implements KeyListener, Collider {
 
-    private Coordinate2D spawn;
-
     private static final double AIR_MOVEMENT_SPEED = 400d;    // px/s
     private static final double SURFACE_MOVEMENT_SPEED = 400d; // px/s
     private static final double JUMP_SPEED = 850d;             // px/s
+    private static final double WALL_JUMP_HORIZONTAL_SPEED = 750d; // px/s
+    private static final double WALL_JUMP_VERTICAL_SPEED = 300d; //px/s
     private static final double GRAVITY = 2880d;               // px/s²
     private static final double MAX_DELTA = 1.0 / 20.0;       // clamp to 20 fps minimum
 
@@ -35,6 +35,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private double verticalSpeed = 0d;
 
     private int health;
+    private int score;
 
     private Consumer<Coordinate2D> positionListener;
     private Consumer<String> debugListener;
@@ -42,11 +43,13 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private final Set<String> collidingTileDescriptions = new LinkedHashSet<>();
 
     private PlayerSprite playerSprite;
+    private final Coordinate2D spawn;
 
     public Player(final Coordinate2D initialLocation) {
         super(initialLocation);
         this.spawn = initialLocation;
         health = 3;
+        score = 0;
     }
 
     public void setPositionListener(Consumer<Coordinate2D> listener) {
@@ -82,11 +85,9 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     private void handleAirMovement(final Set<KeyCode> pressedKeys) {
         if (pressedKeys.contains(KeyCode.LEFT)) {
-            horizontalSpeed = -AIR_MOVEMENT_SPEED;
+            horizontalSpeed = Math.max(horizontalSpeed - AIR_MOVEMENT_SPEED * 0.15, -AIR_MOVEMENT_SPEED);
         } else if (pressedKeys.contains(KeyCode.RIGHT)) {
-            horizontalSpeed = AIR_MOVEMENT_SPEED;
-        } else {
-            horizontalSpeed = 0;
+            horizontalSpeed = Math.min(horizontalSpeed + AIR_MOVEMENT_SPEED * 0.15, AIR_MOVEMENT_SPEED);
         }
     }
 
@@ -111,13 +112,26 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     }
 
     public void jumpAwayFromSurface() {
+        if (attachedSurfaceDirection == null) {
+            return;
+        }
+
         switch (attachedSurfaceDirection) {
             case DOWN -> verticalSpeed = -JUMP_SPEED;
             case UP -> verticalSpeed = JUMP_SPEED;
-            case LEFT -> horizontalSpeed = JUMP_SPEED;
-            case RIGHT -> horizontalSpeed = -JUMP_SPEED;
-            default -> {}
+
+            case LEFT -> {
+                horizontalSpeed = WALL_JUMP_HORIZONTAL_SPEED;
+                verticalSpeed = -WALL_JUMP_VERTICAL_SPEED;
+            }
+            case RIGHT -> {
+                horizontalSpeed = -WALL_JUMP_HORIZONTAL_SPEED;
+                verticalSpeed = -WALL_JUMP_VERTICAL_SPEED;
+            }
+            default -> {
+            }
         }
+
         playerSprite.jump();
         attachedSurfaceDirection = null;
     }
@@ -129,6 +143,18 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     public void takeDamage() {
         health--;
         this.setAnchorLocation(new Coordinate2D(spawn.getX(), spawn.getY() - this.getHeight()));
+    }
+
+    public void regainHealth() {
+        health++;
+    }
+
+    public void addScore(int score) {
+        this.score += score;
+    }
+
+    public int getScore() {
+        return score;
     }
 
     public int getHealth() {
