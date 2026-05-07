@@ -14,7 +14,7 @@ import nl.han.jefmk.levels.editor.LevelSelectScene;
 
 public class EleSlime extends YaegerGame {
 
-    public final static boolean DEBUG = true;
+    public final static boolean DEBUG = false;
     public final static double TILE_SIZE = 100;
     public final static double MOB_SIZE = 80;
 

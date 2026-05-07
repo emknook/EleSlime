@@ -13,7 +13,6 @@ public class PlayerSprite extends DynamicSpriteEntity {
     private final Animation movingRightAnimation = new LoopingAnimation(0, 12, 0, 18);
     private final Animation movingLeftAnimation = new LoopingAnimation(1, 0, 1, 6);
 
-
     private final Animation jumpingRightAnimation;
     private final Animation jumpingLeftAnimation;
 
@@ -35,53 +34,77 @@ public class PlayerSprite extends DynamicSpriteEntity {
         return movingState;
     }
 
+    public boolean isJumping() {
+        return isJumping;
+    }
+
     public void setIdle() {
         switch (movingState) {
-            case MOVING_RIGHT -> idleRight();
-            case MOVING_LEFT -> idleLeft();
+            case MOVING_RIGHT, IDLE_RIGHT, JUMPING_RIGHT -> idleRight();
+            case MOVING_LEFT, IDLE_LEFT, JUMPING_LEFT   -> idleLeft();
         }
     }
 
     public void idleLeft() {
+        if (movingState == MovingState.IDLE_LEFT) return;
         setAutoCycle(300);
         playAnimation(idleLeftAnimation);
         movingState = MovingState.IDLE_LEFT;
     }
 
     public void idleRight() {
+        if (movingState == MovingState.IDLE_RIGHT) return;
         setAutoCycle(300);
         playAnimation(idleRightAnimation);
         movingState = MovingState.IDLE_RIGHT;
     }
 
     public void moveRight() {
+        if (movingState == MovingState.MOVING_RIGHT) return;
         setAutoCycle(100);
         playAnimation(movingRightAnimation);
         movingState = MovingState.MOVING_RIGHT;
     }
 
     public void moveLeft() {
+        if (movingState == MovingState.MOVING_LEFT) return;
         setAutoCycle(100);
         playAnimation(movingLeftAnimation);
         movingState = MovingState.MOVING_LEFT;
     }
 
     public void isNoLongerJumping() {
-        setAutoCycle(300);
         isJumping = false;
     }
 
-    public void jump() {
-        System.out.println("jump");
+    public void jump(Direction fromSurface) {
         if (isJumping) {
             return;
         }
-        System.out.println("not jumping, but will now start jump");
         isJumping = true;
         setAutoCycle(100);
-        switch (movingState) {
-            case MOVING_RIGHT, IDLE_RIGHT -> playAnimation(jumpingRightAnimation);
-            case MOVING_LEFT, IDLE_LEFT -> playAnimation(jumpingLeftAnimation);
+        switch (fromSurface) {
+            case LEFT -> {
+                movingState = MovingState.JUMPING_RIGHT;
+                playAnimation(jumpingRightAnimation);
+            }
+            case RIGHT -> {
+                movingState = MovingState.JUMPING_LEFT;
+                playAnimation(jumpingLeftAnimation);
+            }
+            default -> {
+                switch (movingState) {
+                    case MOVING_RIGHT, IDLE_RIGHT -> {
+                        movingState = MovingState.JUMPING_RIGHT;
+                        playAnimation(jumpingRightAnimation);
+                    }
+                    case MOVING_LEFT, IDLE_LEFT -> {
+                        movingState = MovingState.JUMPING_LEFT;
+                        playAnimation(jumpingLeftAnimation);
+                    }
+                    default -> {}
+                }
+            }
         }
     }
 }

@@ -5,4 +5,6 @@ public enum MovingState {
     IDLE_LEFT,
     MOVING_LEFT,
     MOVING_RIGHT,
+    JUMPING_RIGHT,
+    JUMPING_LEFT,
 }
