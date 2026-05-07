@@ -8,7 +8,6 @@ import com.github.hanyaeger.api.entities.impl.CircleEntity;
 import javafx.scene.paint.Color;
 import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.entities.mobs.Slime;
-import nl.han.jefmk.entities.obstacles.Obstacle;
 import nl.han.jefmk.surfaces.SurfaceCollider;
 import nl.han.jefmk.surfaces.Tile;
 
@@ -40,8 +39,6 @@ public class PlayerCollider extends CircleEntity implements Collided {
                     handleSurfaceCollision(surface);
                     verticallyResolved.add(surface.getTile());
                 }
-            } else if (collider instanceof Obstacle) {
-                ((Obstacle) collider).onCollision(player);
             }
         }
 
@@ -82,9 +79,5 @@ public class PlayerCollider extends CircleEntity implements Collided {
 
     private void handleSlimeCollision(Slime slime) {
         slime.onPlayerCollision(player);
-    }
-
-    private void handleObstacleCollision() {
-        player.takeDamage();
     }
 }

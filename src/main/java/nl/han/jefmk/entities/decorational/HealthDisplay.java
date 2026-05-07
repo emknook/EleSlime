@@ -8,25 +8,24 @@ import com.github.hanyaeger.api.entities.impl.DynamicTextEntity;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import nl.han.jefmk.score.Score;
+import nl.han.jefmk.entities.player.Player;
 
-/**
- * HUD text entity that displays the current score.
- * Updates every second via a timer and reflects the time-penalty-based score.
- */
-public class ScoreDisplay extends DynamicTextEntity implements TimerContainer {
+public class HealthDisplay extends DynamicTextEntity implements TimerContainer {
 
-    public ScoreDisplay(Coordinate2D initialLocation) {
+    private final Player player;
+
+    public HealthDisplay(Coordinate2D initialLocation, Player player) {
         super(initialLocation);
+        this.player = player;
         setFont(Font.font("Monospaced", FontWeight.BOLD, 18));
-        setFill(Color.WHITE);
+        setFill(Color.RED);
         setAnchorPoint(AnchorPoint.TOP_RIGHT);
         updateDisplay();
     }
 
     @Override
     public void setupTimers() {
-        addTimer(new Timer(1000) {
+        addTimer(new Timer(200) {
             @Override
             public void onAnimationUpdate(long timestamp) {
                 updateDisplay();
@@ -35,6 +34,11 @@ public class ScoreDisplay extends DynamicTextEntity implements TimerContainer {
     }
 
     private void updateDisplay() {
-        setText("Score: " + Score.getInstance().getScore());
+        int health = player.getHealth();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < health; i++) {
+            sb.append("♥ ");
+        }
+        setText(sb.toString().stripTrailing());
     }
 }

@@ -26,6 +26,7 @@ import nl.han.jefmk.levels.LevelLoader;
 import nl.han.jefmk.levels.LevelRegistry;
 import nl.han.jefmk.levels.model.*;
 import nl.han.jefmk.levels.registration.MobRegistrar;
+import nl.han.jefmk.levels.registration.ObstacleRegistrar;
 import nl.han.jefmk.levels.registration.PickupRegistrar;
 import nl.han.jefmk.levels.registration.TileRegistrar;
 
@@ -42,11 +43,14 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     private static final List<String> PICKUP_GHOST_SPRITES = PickupRegistrar.getSpriteResources();
     private static final List<String> MOB_TYPE_IDS = MobRegistrar.getTypeIds();
     private static final List<String> MOB_GHOST_SPRITES = MobRegistrar.getSpriteResources();
+    private static final List<String> OBSTACLE_TYPE_IDS = ObstacleRegistrar.getTypeIds();
+    private static final List<String> OBSTACLE_GHOST_SPRITES = ObstacleRegistrar.getSpriteResources();
 
     private EditorMode mode = EditorMode.TILES;
     private int currentTileIndex = 0;
     private int currentPickupIndex = 0;
     private int currentMobIndex = 0;
+    private int currentObstacleIndex = 0;
 
     private final Set<KeyCode> heldKeys = new HashSet<>();
 
@@ -55,6 +59,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     private final List<PickupEntry> pickupEntries = new ArrayList<>();
     private final List<TextEntry> textEntries = new ArrayList<>();
     private final List<MobEntry> mobEntries = new ArrayList<>();
+    private final List<ObstacleEntry> obstacleEntries = new ArrayList<>();
     private SpawnPoint spawn = new SpawnPoint(1, 1);
     private PlayerSprite spawnMarker;
 
@@ -64,6 +69,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     private GhostPreview tileGhost;
     private GhostPreview[] pickupGhosts;
     private GhostPreview[] mobGhosts;
+    private GhostPreview[] obstacleGhosts;
     private GhostPreview spawnGhost;
 
     private final String levelName;
@@ -135,6 +141,14 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
             addEntity(mobGhosts[i]);
         }
 
+        // Obstacle ghosts
+        obstacleGhosts = new GhostPreview[OBSTACLE_GHOST_SPRITES.size()];
+        for (int i = 0; i < OBSTACLE_GHOST_SPRITES.size(); i++) {
+            obstacleGhosts[i] = new GhostPreview(OBSTACLE_GHOST_SPRITES.get(i), origin);
+            obstacleGhosts[i].setVisible(false);
+            addEntity(obstacleGhosts[i]);
+        }
+
         // Spawn ghost (green "S" represented as the player sprite)
         spawnGhost = new GhostPreview("sprites/eleslime.png", origin);
         spawnGhost.setVisible(false);
@@ -194,6 +208,9 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         for (GhostPreview pg : mobGhosts) {
             pg.updatePosition(lastGridPixel);
         }
+        for (GhostPreview pg : obstacleGhosts) {
+            pg.updatePosition(lastGridPixel);
+        }
         spawnGhost.updatePosition(spawnDisplayPixel(gridX, gridY));
     }
 
@@ -206,6 +223,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
             switch (mode) {
                 case TILES -> placeTile(gridX, gridY);
                 case PICKUPS -> placePickup(gridX, gridY);
+                case OBSTACLES -> placeObstacle(gridX, gridY);
                 case TEXT -> placeText(gridX, gridY);
                 case SPAWN -> placeSpawn(gridX, gridY);
                 case MOBS -> placeMob(gridX, gridY);
@@ -247,6 +265,14 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         addPlacedEntity(entry, levelBuilder.build(entry, TILE_SIZE));
     }
 
+    private void placeObstacle(int gridX, int gridY) {
+        removeObstacleAt(gridX, gridY);
+        expandWorldIfNeeded(gridX, gridY);
+        ObstacleEntry entry = new ObstacleEntry(gridX, gridY, currentObstacleTypeId());
+        obstacleEntries.add(entry);
+        addPlacedEntity(entry, levelBuilder.build(entry, TILE_SIZE));
+    }
+
     private void placeText(int gridX, int gridY) {
         TextInputDialog dialog = new TextInputDialog("");
         dialog.setTitle("Place Text");
@@ -275,6 +301,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         removePickupAt(gridX, gridY);
         removeTextAt(gridX, gridY);
         removeMobAt(gridX, gridY);
+        removeObstacleAt(gridX, gridY);
     }
 
     private void removeTileAt(int gridX, int gridY) {
@@ -295,6 +322,11 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     private void removeMobAt(int gridX, int gridY) {
         removeEntity("mob", gridX, gridY);
         mobEntries.removeIf(e -> e.getGridX() == gridX && e.getGridY() == gridY);
+    }
+
+    private void removeObstacleAt(int gridX, int gridY) {
+        removeEntity("obstacle", gridX, gridY);
+        obstacleEntries.removeIf(e -> e.getGridX() == gridX && e.getGridY() == gridY);
     }
 
     private void removeEntity(String prefix, int gridX, int gridY) {
@@ -410,6 +442,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         switch (mode) {
             case TILES -> currentTileIndex = Math.floorMod(currentTileIndex + delta, TILE_TYPE_IDS.size());
             case PICKUPS -> currentPickupIndex = Math.floorMod(currentPickupIndex + delta, PICKUP_TYPE_IDS.size());
+            case OBSTACLES -> currentObstacleIndex = Math.floorMod(currentObstacleIndex + delta, OBSTACLE_TYPE_IDS.size());
             case MOBS -> currentMobIndex = Math.floorMod(currentMobIndex + delta, MOB_TYPE_IDS.size());
             default -> {}
         }
@@ -426,6 +459,10 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
             case PICKUPS -> {
                 currentTypeLabel.setText("Pickup: " + currentPickupTypeId());
                 modeLabel.setText("Mode: PICKUPS");
+            }
+            case OBSTACLES -> {
+                currentTypeLabel.setText("Obstacle: " + currentObstacleTypeId());
+                modeLabel.setText("Mode: OBSTACLES");
             }
             case MOBS -> {
                 currentTypeLabel.setText("Mob: " + currentMobTypeId());
@@ -448,6 +485,9 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         spawnGhost.setVisible(mode == EditorMode.SPAWN);
         for (int i = 0; i < pickupGhosts.length; i++) {
             pickupGhosts[i].setVisible(mode == EditorMode.PICKUPS && i == currentPickupIndex);
+        }
+        for (int i = 0; i < obstacleGhosts.length; i++) {
+            obstacleGhosts[i].setVisible(mode == EditorMode.OBSTACLES && i == currentObstacleIndex);
         }
         for (int i = 0; i < mobGhosts.length; i++) {
             mobGhosts[i].setVisible(mode == EditorMode.MOBS && i == currentMobIndex);
@@ -491,6 +531,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         data.setTiles(new ArrayList<>(tileEntries));
         data.setPickups(new ArrayList<>(pickupEntries));
         data.setMobs(new ArrayList<>(mobEntries));
+        data.setObstacles(new ArrayList<>(obstacleEntries));
         data.setTexts(new ArrayList<>(textEntries));
         return data;
     }
@@ -505,8 +546,13 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
 
     private String currentMobTypeId() { return MOB_TYPE_IDS.get(currentMobIndex); }
 
+    private String currentObstacleTypeId() { return OBSTACLE_TYPE_IDS.get(currentObstacleIndex); }
+
     private void addPlacedEntity(GridEntry entry, YaegerEntity entity) {
-        String prefix = entry instanceof PickupEntry ? "pickup" : "tile";
+        String prefix = entry instanceof PickupEntry ? "pickup"
+                : entry instanceof ObstacleEntry ? "obstacle"
+                : entry instanceof MobEntry ? "mob"
+                : "tile";
         placedEntities.put(key(prefix, entry.getGridX(), entry.getGridY()), entity);
         addEntity(entity);
     }

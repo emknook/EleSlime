@@ -152,8 +152,14 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     public void takeDamage() {
         health--;
-        Score.getInstance().resetForDeath();
-        this.setAnchorLocation(new Coordinate2D(spawn.getX(), spawn.getY() - this.getHeight()));
+        checkForDeath();
+    }
+
+    private void checkForDeath() {
+        if (health <= 0) {
+            Score.getInstance().resetForDeath();
+            this.setAnchorLocation(new Coordinate2D(spawn.getX(), spawn.getY() - this.getHeight()));
+        }
     }
 
     public void regainHealth() {
@@ -288,10 +294,23 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     }
 
     public void takeKnockback(Obstacle obstacle) {
-        if (obstacle.getAnchorLocation().getX() < this.getAnchorLocation().getX()) {
-            horizontalSpeed = AIR_MOVEMENT_SPEED;
+        // Calculate horizontal knockback direction (away from obstacle)
+        double obstacleX = obstacle.getAnchorLocation().getX();
+        double playerX = this.getAnchorLocation().getX();
+        
+        if (obstacleX < playerX) {
+            // Obstacle is to the left, knock player right
+            horizontalSpeed = AIR_MOVEMENT_SPEED * 1.5;
         } else {
-            horizontalSpeed = -AIR_MOVEMENT_SPEED;
+            // Obstacle is to the right, knock player left
+            horizontalSpeed = -AIR_MOVEMENT_SPEED * 1.5;
         }
+        
+        // Vertical knockback: throw upward at jump speed
+        verticalSpeed = -JUMP_SPEED;
+        
+        // Clear attached surface so player enters air state and gravity applies
+        attachedSurfaceDirection = null;
+        touchingSurfaceDirections.clear();
     }
 }

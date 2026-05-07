@@ -11,6 +11,7 @@ public class LevelData {
     private List<PickupEntry> pickups = new ArrayList<>();
     private List<TextEntry> texts = new ArrayList<>();
     private List<MobEntry> mobs = new ArrayList<>();
+    private List<ObstacleEntry> obstacles = new ArrayList<>();
 
     public LevelData() {
     }
@@ -66,4 +67,8 @@ public class LevelData {
     public List<MobEntry> getMobs() { return mobs; }
 
     public void setMobs(List<MobEntry> mobs) { this.mobs = mobs; }
+
+    public List<ObstacleEntry> getObstacles() { return obstacles; }
+
+    public void setObstacles(List<ObstacleEntry> obstacles) { this.obstacles = obstacles; }
 }

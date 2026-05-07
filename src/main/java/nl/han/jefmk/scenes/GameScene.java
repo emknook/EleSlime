@@ -10,6 +10,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import nl.han.jefmk.EleSlime;
+import nl.han.jefmk.entities.decorational.HealthDisplay;
 import nl.han.jefmk.entities.decorational.ScoreDisplay;
 import nl.han.jefmk.entities.player.Player;
 import nl.han.jefmk.levels.LevelBuilder;
@@ -45,7 +46,8 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
         // Start small; expands as the camera follows the player outward
         setSize(new Size(WORLD_MARGIN * 2, WORLD_MARGIN * 2));
         Score.getInstance().resetForNewLevel();
-        addEntity(new ScoreDisplay(new Coordinate2D(10, 10)), true);
+        double vpWidth = getViewportWidth();
+        addEntity(new ScoreDisplay(new Coordinate2D(vpWidth - 10, 10)), true);
     }
 
     @Override
@@ -73,6 +75,7 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
             );
             expandWorldIfNeeded(spawnWorldPos.getX(), spawnWorldPos.getY());
             Player player = new Player(spawnWorldPos);
+            addEntity(new HealthDisplay(new Coordinate2D(getViewportWidth() - 10, 35), player), true);
             player.setPositionListener(pos -> {
                 expandWorldIfNeeded(pos.getX(), pos.getY());
                 updateCameraPosition(pos);
