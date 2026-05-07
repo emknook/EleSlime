@@ -24,13 +24,17 @@ public class LevelBuilder {
     }
 
     public void buildFromData(LevelData data, BiConsumer<GridEntry, YaegerEntity> entityAdder, Consumer<YaegerEntity> textAdder) {
-        int tileSize = data.getTileSize();
+        double tileSize = data.getTileSize();
 
         for (GridEntry entry : data.getTiles()) {
             entityAdder.accept(entry, build(entry, tileSize));
         }
 
         for (GridEntry entry : data.getPickups()) {
+            entityAdder.accept(entry, build(entry, tileSize));
+        }
+
+        for (GridEntry entry : data.getMobs()) {
             entityAdder.accept(entry, build(entry, tileSize));
         }
 
@@ -44,11 +48,11 @@ public class LevelBuilder {
         }
     }
 
-    public YaegerEntity build(GridEntry entry, int tileSize) {
+    public YaegerEntity build(GridEntry entry, double tileSize) {
         return registry.create(entry.getType(), toLocation(entry, tileSize));
     }
 
-    private Coordinate2D toLocation(GridEntry entry, int tileSize) {
+    private Coordinate2D toLocation(GridEntry entry, double tileSize) {
         return new Coordinate2D(entry.getGridX() * tileSize, EleSlime.Y_OFFSET + entry.getGridY() * tileSize);
     }
 }

@@ -4,22 +4,19 @@ import com.github.hanyaeger.api.Size;
 import com.github.hanyaeger.api.YaegerGame;
 import javafx.application.Platform;
 
-import java.util.Arrays;
-
 import nl.han.jefmk.levels.LevelRegistry;
+import nl.han.jefmk.levels.registration.MobRegistrar;
 import nl.han.jefmk.levels.registration.PickupRegistrar;
 import nl.han.jefmk.levels.registration.TileRegistrar;
-import nl.han.jefmk.scenes.ExampleScene;
 import nl.han.jefmk.scenes.GameScene;
 import nl.han.jefmk.levels.editor.LevelEditorScene;
 import nl.han.jefmk.levels.editor.LevelSelectScene;
-import javafx.stage.Screen;
-import javafx.geometry.Rectangle2D;
 
 public class EleSlime extends YaegerGame {
 
     public final static boolean DEBUG = true;
-    public final static int TILE_SIZE = 100;
+    public final static double TILE_SIZE = 100;
+    public final static double MOB_SIZE = 80;
 
     // Used to roughly offset the world so we have more space above
     public final static int Y_OFFSET = 6000;
@@ -35,6 +32,7 @@ public class EleSlime extends YaegerGame {
         LevelRegistry registry = LevelRegistry.getInstance();
         TileRegistrar.registerAll(registry);
         PickupRegistrar.registerAll(registry);
+        MobRegistrar.registerAll(registry);
     }
 
     @Override

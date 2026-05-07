@@ -5,11 +5,12 @@ import java.util.List;
 
 public class LevelData {
     private String name;
-    private int tileSize;
+    private double tileSize;
     private SpawnPoint spawn;
     private List<TileEntry> tiles = new ArrayList<>();
     private List<PickupEntry> pickups = new ArrayList<>();
     private List<TextEntry> texts = new ArrayList<>();
+    private List<MobEntry> mobs = new ArrayList<>();
 
     public LevelData() {
     }
@@ -22,11 +23,11 @@ public class LevelData {
         this.name = name;
     }
 
-    public int getTileSize() {
+    public double getTileSize() {
         return tileSize;
     }
 
-    public void setTileSize(int tileSize) {
+    public void setTileSize(double tileSize) {
         this.tileSize = tileSize;
     }
 
@@ -61,4 +62,8 @@ public class LevelData {
     public void setTexts(List<TextEntry> texts) {
         this.texts = texts;
     }
+
+    public List<MobEntry> getMobs() { return mobs; }
+
+    public void setMobs(List<MobEntry> mobs) { this.mobs = mobs; }
 }

@@ -52,6 +52,8 @@ public class Tile extends CompositeEntity {
                 addEntity(new SurfaceCollider(thisLocation, Direction.DOWN, this));
                 addEntity(new SurfaceCollider(thisLocation, Direction.LEFT, this));
                 break;
+            default:
+                break;
         }
     }
 }
