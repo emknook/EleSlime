@@ -8,8 +8,8 @@ import com.github.hanyaeger.api.entities.DynamicCompositeEntity;
 import com.github.hanyaeger.api.userinput.KeyListener;
 import javafx.scene.input.KeyCode;
 import nl.han.jefmk.EleSlime;
+import nl.han.jefmk.entities.obstacles.Obstacle;
 import nl.han.jefmk.score.Score;
-
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -285,5 +285,13 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     public void clearTouchingSurfaceDirections() {
         touchingSurfaceDirections.clear();
         collidingTileDescriptions.clear();
+    }
+
+    public void takeKnockback(Obstacle obstacle) {
+        if (obstacle.getAnchorLocation().getX() < this.getAnchorLocation().getX()) {
+            horizontalSpeed = AIR_MOVEMENT_SPEED;
+        } else {
+            horizontalSpeed = -AIR_MOVEMENT_SPEED;
+        }
     }
 }

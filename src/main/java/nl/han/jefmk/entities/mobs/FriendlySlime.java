@@ -3,6 +3,7 @@ package nl.han.jefmk.entities.mobs;
 import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.entities.Animation;
 import com.github.hanyaeger.api.entities.LoopingAnimation;
+import nl.han.jefmk.entities.player.Player;
 
 public class FriendlySlime extends Slime {
 
@@ -17,5 +18,10 @@ public class FriendlySlime extends Slime {
 
     public void idleRight() {
         playAnimation(idleRightAnimation);
+    }
+
+    @Override
+    public void onPlayerCollision(Player player) {
+        // friendly slime has no effect on the player
     }
 }

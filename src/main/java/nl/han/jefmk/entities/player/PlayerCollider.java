@@ -7,13 +7,8 @@ import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.impl.CircleEntity;
 import javafx.scene.paint.Color;
 import nl.han.jefmk.EleSlime;
-import nl.han.jefmk.entities.mobs.EnemySlime;
 import nl.han.jefmk.entities.mobs.Slime;
 import nl.han.jefmk.entities.obstacles.Obstacle;
-import nl.han.jefmk.entities.pickups.BlueShroom;
-import nl.han.jefmk.entities.pickups.GreenShroom;
-import nl.han.jefmk.entities.pickups.Pickup;
-import nl.han.jefmk.score.Score;
 import nl.han.jefmk.surfaces.SurfaceCollider;
 import nl.han.jefmk.surfaces.Tile;
 
@@ -46,9 +41,7 @@ public class PlayerCollider extends CircleEntity implements Collided {
                     verticallyResolved.add(surface.getTile());
                 }
             } else if (collider instanceof Obstacle) {
-                handleObstacleCollision();
-            } else if (collider instanceof Pickup pickup) {
-                handlePickupCollision(pickup);
+                ((Obstacle) collider).onCollision(player);
             }
         }
 
@@ -88,21 +81,10 @@ public class PlayerCollider extends CircleEntity implements Collided {
     }
 
     private void handleSlimeCollision(Slime slime) {
-        if (slime instanceof EnemySlime) {
-            player.takeDamage();
-        }
+        slime.onPlayerCollision(player);
     }
 
     private void handleObstacleCollision() {
         player.takeDamage();
     }
-
-    private void handlePickupCollision(Pickup pickup) {
-        if (pickup instanceof GreenShroom) {
-            player.regainHealth();
-        } else if (pickup instanceof BlueShroom) {
-            Score.getInstance().addScore(100);
-        }
-    }
-
 }
