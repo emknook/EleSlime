@@ -8,6 +8,7 @@ import com.github.hanyaeger.api.entities.DynamicCompositeEntity;
 import com.github.hanyaeger.api.userinput.KeyListener;
 import javafx.scene.input.KeyCode;
 import nl.han.jefmk.EleSlime;
+import nl.han.jefmk.score.Score;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -37,7 +38,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private double verticalSpeed = 0d;
 
     private int health;
-    private int score;
 
     private Consumer<Coordinate2D> positionListener;
     private Consumer<String> debugListener;
@@ -51,7 +51,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         super(initialLocation);
         this.spawn = initialLocation;
         health = 3;
-        score = 0;
     }
 
     public void setPositionListener(Consumer<Coordinate2D> listener) {
@@ -153,19 +152,12 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     public void takeDamage() {
         health--;
+        Score.getInstance().resetForDeath();
         this.setAnchorLocation(new Coordinate2D(spawn.getX(), spawn.getY() - this.getHeight()));
     }
 
     public void regainHealth() {
         health++;
-    }
-
-    public void addScore(int score) {
-        this.score += score;
-    }
-
-    public int getScore() {
-        return score;
     }
 
     public int getHealth() {
