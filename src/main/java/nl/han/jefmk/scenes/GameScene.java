@@ -74,8 +74,8 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
                     EleSlime.Y_OFFSET + data.getSpawn().getGridY() * tileSize
             );
             expandWorldIfNeeded(spawnWorldPos.getX(), spawnWorldPos.getY());
-            Player player = new Player(spawnWorldPos);
-            addEntity(new HealthDisplay(new Coordinate2D(getViewportWidth() - 10, 35), player), true);
+            Player player = new Player(spawnWorldPos, 3);
+            addEntity(new HealthDisplay(new Coordinate2D(getViewportWidth() - 80, 35), player), true);
             player.setPositionListener(pos -> {
                 expandWorldIfNeeded(pos.getX(), pos.getY());
                 updateCameraPosition(pos);

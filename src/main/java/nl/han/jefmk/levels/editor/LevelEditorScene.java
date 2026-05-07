@@ -105,6 +105,12 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         for (PickupEntry pickup : pickupEntries) {
             expandWorldIfNeeded(pickup.getGridX(), pickup.getGridY());
         }
+        for (MobEntry mob : mobEntries) {
+            expandWorldIfNeeded(mob.getGridX(), mob.getGridY());
+        }
+        for (ObstacleEntry obstacle : obstacleEntries) {
+            expandWorldIfNeeded(obstacle.getGridX(), obstacle.getGridY());
+        }
         expandWorldIfNeeded(spawn.getGridX(), spawn.getGridY());
         levelBuilder.buildFromData(toLevelData(), this::addPlacedEntity, this::addEntity);
         setupUI();
@@ -167,6 +173,12 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
             pickupEntries.addAll(data.getPickups());
             if (data.getTexts() != null) {
                 textEntries.addAll(data.getTexts());
+            }
+            if (data.getMobs() != null) {
+                mobEntries.addAll(data.getMobs());
+            }
+            if (data.getObstacles() != null) {
+                obstacleEntries.addAll(data.getObstacles());
             }
             if (data.getSpawn() != null) {
                 spawn = data.getSpawn();

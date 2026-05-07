@@ -21,7 +21,7 @@ public class EnemySlime extends Slime implements TimerContainer {
     private int xLocation = 0;
 
     public EnemySlime(Coordinate2D initialLocation) {
-        super("sprites/enemy-spritesheet.png", initialLocation, 2, 9);
+        super("sprites/enemy-spritesheet.png", initialLocation, 2, 9, 1);
         idleLeft();
     }
 

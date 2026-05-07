@@ -8,8 +8,8 @@ import nl.han.jefmk.entities.player.Player;
 public class Stalagmite extends Obstacle {
     public Stalagmite(Coordinate2D initialLocation) {
         super("sprites/stalagmite.png", initialLocation,
-                new Size(EleSlime.TILE_SIZE * 0.5, EleSlime.TILE_SIZE * 0.8),
-                new Coordinate2D(EleSlime.TILE_SIZE * 0.25, EleSlime.TILE_SIZE * 0.2));
+                new Size(EleSlime.TILE_SIZE, EleSlime.TILE_SIZE * 0.2),
+                new Coordinate2D(0, EleSlime.TILE_SIZE * 0.8));
     }
 
     @Override

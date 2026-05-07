@@ -2626,12 +2626,6 @@
     },
     {
       "config": {},
-      "gridX": 20,
-      "gridY": -30,
-      "type": "green_shroom"
-    },
-    {
-      "config": {},
       "gridX": 23,
       "gridY": -30,
       "type": "blue_shroom"
@@ -2657,9 +2651,14 @@
       "type": "stalagmite"
     },
     {
-      "gridX": 19,
+      "gridX": 21,
       "gridY": -30,
-      "type": "stalagmite"
+      "type": "sulphur"
+    },
+    {
+      "gridX": 31,
+      "gridY": -30,
+      "type": "sulphur"
     }
   ]
 }

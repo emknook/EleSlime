@@ -1,6 +1,7 @@
 package nl.han.jefmk.levels.registration;
 
 import nl.han.jefmk.entities.obstacles.Stalagmite;
+import nl.han.jefmk.entities.obstacles.Sulphur;
 import nl.han.jefmk.levels.EntitySupplier;
 import nl.han.jefmk.levels.LevelRegistry;
 
@@ -9,7 +10,8 @@ import java.util.List;
 public class ObstacleRegistrar {
 
     private static final List<ObstacleDefinition> OBSTACLE_DEFINITIONS = List.of(
-            new ObstacleDefinition("stalagmite", "sprites/stalagmite.png", Stalagmite::new)
+            new ObstacleDefinition("stalagmite", "sprites/stalagmite.png", Stalagmite::new),
+            new ObstacleDefinition("sulphur", "sprites/sulphur.png", Sulphur::new)
     );
 
     private static final List<String> TYPE_IDS = OBSTACLE_DEFINITIONS.stream()

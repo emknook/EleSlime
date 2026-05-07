@@ -7,14 +7,40 @@ import com.github.hanyaeger.api.entities.Collider;
 import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.Newtonian;
 import com.github.hanyaeger.api.entities.impl.DynamicSpriteEntity;
+import nl.han.jefmk.entities.HasHealth;
+import nl.han.jefmk.entities.Health;
 import nl.han.jefmk.surfaces.SurfaceCollider;
 import nl.han.jefmk.surfaces.Tile;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public class Mob extends DynamicSpriteEntity implements Newtonian, Collider, Collided {
-    protected Mob(String resource, Coordinate2D initialLocation, Size size, int rows, int columns) {
+public class Mob extends DynamicSpriteEntity implements Newtonian, Collider, Collided, HasHealth {
+    private final Health health;
+
+    protected Mob(String resource, Coordinate2D initialLocation, Size size, int rows, int columns, int initialHealth) {
         super(resource, initialLocation, size, rows, columns);
+        this.health = new Health(initialHealth);
+    }
+
+    @Override
+    public int getHealth() {
+        return health.get();
+    }
+
+    @Override
+    public void takeDamage() {
+        health.damage();
+    }
+
+    @Override
+    public void regainHealth() {
+        health.regain();
+    }
+
+    @Override
+    public void addHealthListener(Consumer<Integer> listener) {
+        health.addListener(listener);
     }
 
     @Override
