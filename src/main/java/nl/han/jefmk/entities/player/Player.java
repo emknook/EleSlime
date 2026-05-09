@@ -11,6 +11,7 @@ import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.entities.HasHealth;
 import nl.han.jefmk.entities.Health;
 import nl.han.jefmk.entities.obstacles.Obstacle;
+import nl.han.jefmk.scenes.GameScene;
 import nl.han.jefmk.score.Score;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -39,6 +40,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private double horizontalSpeed = 0d;
     private double verticalSpeed = 0d;
     private double knockbackTime = 0d;  // seconds
+    private double shootingTime = 0d;
 
     private final Health health;
 
@@ -49,11 +51,13 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     private PlayerSprite playerSprite;
     private final Coordinate2D spawn;
+    private final GameScene level;
 
-    public Player(final Coordinate2D initialLocation, int initialHealth) {
+    public Player(final Coordinate2D initialLocation, int initialHealth, GameScene level) {
         super(initialLocation);
         this.spawn = initialLocation;
         this.health = new Health(initialHealth);
+        this.level = level;
     }
 
     public void setPositionListener(Consumer<Coordinate2D> listener) {
@@ -261,10 +265,14 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         lastTimestamp = timestamp;
 
         knockbackTime -= dt;
+        shootingTime -= dt;
 
         if (knockbackTime > 0) {
             // Gradually reduce horizontal velocity during knockback
             horizontalSpeed *= Math.pow(0.02, dt);
+        }
+        if (shootingTime < 0) {
+            checkShootingPressed();
         }
 
         updateAttachedSurface();
@@ -295,6 +303,17 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         }
 
         clearTouchingSurfaceDirections();
+    }
+
+    private void checkShootingPressed() {
+        if (currentPressedKeys.contains(KeyCode.Z)) {
+            spawnLightningBolt();
+        }
+    }
+
+    private void spawnLightningBolt() {
+        shootingTime = 1.0d; //can shoot once per second
+        level.createLightningBolt(new Coordinate2D(this.getBoundingBox().getMaxX(), this.getBoundingBox().getCenterY()), Direction.RIGHT);
     }
 
     private void determineSpriteAnimation() {

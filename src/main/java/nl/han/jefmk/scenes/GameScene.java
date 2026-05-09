@@ -2,6 +2,7 @@ package nl.han.jefmk.scenes;
 
 import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.Size;
+import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.impl.TextEntity;
 import com.github.hanyaeger.api.scenes.ScrollableDynamicScene;
 import com.github.hanyaeger.api.userinput.KeyListener;
@@ -13,6 +14,7 @@ import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.entities.decorational.HealthDisplay;
 import nl.han.jefmk.entities.decorational.ScoreDisplay;
 import nl.han.jefmk.entities.player.Player;
+import nl.han.jefmk.entities.projectiles.Lightning;
 import nl.han.jefmk.levels.LevelBuilder;
 import nl.han.jefmk.score.Score;
 import nl.han.jefmk.levels.LevelLoader;
@@ -74,7 +76,7 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
                     EleSlime.Y_OFFSET + data.getSpawn().getGridY() * tileSize
             );
             expandWorldIfNeeded(spawnWorldPos.getX(), spawnWorldPos.getY());
-            Player player = new Player(spawnWorldPos, 3);
+            Player player = new Player(spawnWorldPos, 3, this);
             addEntity(new HealthDisplay(new Coordinate2D(getViewportWidth() - 80, 35), player), true);
             player.setPositionListener(pos -> {
                 expandWorldIfNeeded(pos.getX(), pos.getY());
@@ -90,6 +92,11 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
             }
             addEntity(player);
         }
+    }
+
+    public void createLightningBolt(final Coordinate2D coordinate2D, final Direction direction) {
+        var lightningBolt = new Lightning(coordinate2D, direction);
+        addEntity(lightningBolt);
     }
 
     private void expandWorldIfNeeded(double worldX, double worldY) {

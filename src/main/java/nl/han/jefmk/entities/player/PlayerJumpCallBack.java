@@ -11,7 +11,6 @@ public class PlayerJumpCallBack implements AnimationCallback {
 
     @Override
     public void call() {
-        System.out.println("PlayerJumpCallBack call");
         playerSprite.isNoLongerJumping();
     }
 }
