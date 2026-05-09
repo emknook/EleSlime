@@ -11,6 +11,7 @@ import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.entities.HasHealth;
 import nl.han.jefmk.entities.Health;
 import nl.han.jefmk.entities.obstacles.Obstacle;
+import nl.han.jefmk.scenes.GameScene;
 import nl.han.jefmk.score.Score;
 import nl.han.jefmk.surfaces.SurfaceOwner;
 import java.util.HashSet;
@@ -40,6 +41,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     private double horizontalSpeed = 0d;
     private double verticalSpeed = 0d;
+    private double shootingTime = 0d;
 
     private final Health health;
 
@@ -51,11 +53,13 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private PlayerSprite playerSprite;
     private final Coordinate2D spawn;
     private boolean isTakingKnockback;
+    private final GameScene level;
 
-    public Player(final Coordinate2D initialLocation, int initialHealth) {
+    public Player(final Coordinate2D initialLocation, int initialHealth, GameScene level) {
         super(initialLocation);
         this.spawn = initialLocation;
         this.health = new Health(initialHealth);
+        this.level = level;
     }
 
     public void setPositionListener(Consumer<Coordinate2D> listener) {
@@ -111,22 +115,22 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
         if(isTakingKnockback) {
             isTakingKnockback = false;
-        }else {
+        } else {
             verticalSpeed = 0;
         }
 
-        if (pressedKeys.contains(KeyCode.LEFT)) {
+        if (pressedKeys.contains(KeyCode.LEFT) || pressedKeys.contains(KeyCode.A)) {
             horizontalSpeed = -SURFACE_MOVEMENT_SPEED;
-        } else if (pressedKeys.contains(KeyCode.RIGHT)) {
+        } else if (pressedKeys.contains(KeyCode.RIGHT)  || pressedKeys.contains(KeyCode.D)) {
             horizontalSpeed = SURFACE_MOVEMENT_SPEED;
         }
     }
 
     private void handleVerticalSurfaceMovement(final Set<KeyCode> pressedKeys) {
         verticalSpeed = 0;
-        if (pressedKeys.contains(KeyCode.UP)) {
+        if (pressedKeys.contains(KeyCode.UP) || pressedKeys.contains(KeyCode.W)) {
             verticalSpeed = -SURFACE_MOVEMENT_SPEED;
-        } else if (pressedKeys.contains(KeyCode.DOWN)) {
+        } else if (pressedKeys.contains(KeyCode.DOWN) || pressedKeys.contains(KeyCode.S)) {
             verticalSpeed = SURFACE_MOVEMENT_SPEED;
         }
         horizontalSpeed = 0;
@@ -272,6 +276,12 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         double dt = Math.min((timestamp - lastTimestamp) / 1_000_000_000.0, MAX_DELTA);
         lastTimestamp = timestamp;
 
+        shootingTime -= dt;
+      
+        if (shootingTime < 0) {
+            checkShootingPressed();
+        }
+
         updateAttachedSurface();
         updateRotationBasedOnAttachedSurface();
         applyInputMovement();
@@ -305,6 +315,17 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         }
 
         clearTouchingSurfaceDirections();
+    }
+
+    private void checkShootingPressed() {
+        if (currentPressedKeys.contains(KeyCode.Z)) {
+            spawnLightningBolt();
+        }
+    }
+
+    private void spawnLightningBolt() {
+        shootingTime = 1.0d; //can shoot once per second
+        level.createLightningBolt(new Coordinate2D(getAnchorLocation().getX() + getWidth(), getAnchorLocation().getY() + getHeight() / 2), this.getRotationForProjectile(), 3);
     }
 
     private void determineSpriteAnimation() {
@@ -341,6 +362,17 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         touchingSurfaceDirections.clear();
         collidingTileDescriptions.clear();
         standingOwner = null;
+    }
+
+    public double getRotationForProjectile() {
+        switch (playerSprite.getMovingState()) {
+            case MOVING_LEFT, IDLE_LEFT, JUMPING_LEFT -> {
+                return this.playerSprite.getRotation() - 180;
+            }
+            default -> {
+                return this.playerSprite.getRotation();
+            }
+        }
     }
 
     public void takeKnockback(Obstacle obstacle) {

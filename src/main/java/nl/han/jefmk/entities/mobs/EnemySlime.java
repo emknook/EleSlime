@@ -73,6 +73,14 @@ public class EnemySlime extends Slime implements TimerContainer {
         player.takeDamage();
     }
 
+    public void getHitByLightning() {
+        takeDamage();
+        //TODO: add death animation, then remove entity
+        if (this.getHealth() <= 0) {
+            this.remove();
+        }
+    }
+
     private class MovingTimer extends Timer {
         /**
          * Create a new instance of {@link Timer} for the given interval in milliseconds.
