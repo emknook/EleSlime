@@ -2,10 +2,7 @@ package nl.han.jefmk.entities.mobs;
 
 import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.Size;
-import com.github.hanyaeger.api.entities.Collided;
-import com.github.hanyaeger.api.entities.Collider;
-import com.github.hanyaeger.api.entities.Direction;
-import com.github.hanyaeger.api.entities.Newtonian;
+import com.github.hanyaeger.api.entities.*;
 import com.github.hanyaeger.api.entities.impl.DynamicSpriteEntity;
 import nl.han.jefmk.entities.HasHealth;
 import nl.han.jefmk.entities.Health;

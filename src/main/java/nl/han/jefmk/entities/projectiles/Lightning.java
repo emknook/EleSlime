@@ -6,35 +6,40 @@ import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.entities.mobs.EnemySlime;
 import nl.han.jefmk.scenes.GameScene;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 public class Lightning extends DynamicCompositeEntity {
 
 
     private static final double SPEED = 14d;
+    private static final double CHAIN_RANGE_IN_TILES = 5d;
+    private static final double CHAIN_CHANCE = 0.10d;
 
     private final int bouncesLeft;
 
-    private final ArrayList<EnemySlime> potentialTargets;
+    private final Set<EnemySlime> potentialTargets = new HashSet<>();
     private final GameScene gameScene;
+    private final Random random = new Random();
 
     public Lightning(final Coordinate2D coordinate2D, final double rotation, GameScene gameScene, int bouncesLeft) {
         super(coordinate2D);
         this.gameScene = gameScene;
         this.bouncesLeft = bouncesLeft;
         this.setRotate(-rotation);
-        potentialTargets = new ArrayList<>();
         setMotion(SPEED, 90 - rotation);
     }
 
     @Override
     protected void setupEntities() {
-        double chainColliderSize = EleSlime.TILE_SIZE * 5;
-        var lightningChainCollider = new LightningChainZoneCollider(new  Coordinate2D(0, 0), this, chainColliderSize);
+        double chainColliderSize = EleSlime.TILE_SIZE * CHAIN_RANGE_IN_TILES;
+        Coordinate2D relativeOrigin = new  Coordinate2D(0, 0);
+        var lightningChainCollider = new LightningChainZoneCollider(relativeOrigin, this, chainColliderSize);
         addEntity(lightningChainCollider);
-        var lightningCollider = new LightningCollider(new Coordinate2D(0, 0), this);
+        var lightningCollider = new LightningCollider(relativeOrigin, this);
         addEntity(lightningCollider);
-        var lightningSprite = new LightningSprite(new Coordinate2D(0, 0));
+        var lightningSprite = new LightningSprite(relativeOrigin);
         addEntity(lightningSprite);
     }
 
@@ -47,11 +52,16 @@ public class Lightning extends DynamicCompositeEntity {
     }
 
     public void chainEffect() {
+        if (bouncesLeft <= 0) {
+            return;
+        }
         for(EnemySlime target :potentialTargets) {
-            double chainChance = Math.random();
-            if(chainChance < 0.10) {
-                double theta = Math.atan((target.getAnchorLocation().getY() - this.getAnchorLocation().getY()) /  (target.getAnchorLocation().getX() - this.getAnchorLocation().getX()));
-                double angle = theta * (180/Math.PI);
+            double chainChance = random.nextDouble();
+            if(chainChance < CHAIN_CHANCE) {
+                double deltaY = target.getAnchorLocation().getY() - getAnchorLocation().getY();
+                double deltaX = target.getAnchorLocation().getX() - getAnchorLocation().getX();
+
+                double angle = Math.toDegrees(Math.atan2(deltaY, deltaX));
                 gameScene.createLightningBolt(this.getAnchorLocation(), angle, bouncesLeft - 1);
             }
         }
