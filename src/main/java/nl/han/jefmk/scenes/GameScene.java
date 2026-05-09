@@ -12,6 +12,8 @@ import javafx.scene.text.FontWeight;
 import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.entities.decorational.HealthDisplay;
 import nl.han.jefmk.entities.decorational.ScoreDisplay;
+import nl.han.jefmk.entities.mobs.EnemySlime;
+import nl.han.jefmk.entities.pickups.WinFlag;
 import nl.han.jefmk.entities.player.Player;
 import nl.han.jefmk.levels.LevelBuilder;
 import nl.han.jefmk.score.Score;
@@ -59,6 +61,11 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
         LevelData data = loader.load(levelName);
         builder.buildFromData(data, (entry, entity) -> addEntity(entity), this::addEntity);
 
+        // Register win_flag with the win callback before building the level.
+        // This overrides the null placeholder registered in PickupRegistrar.
+        registry.register("win_flag", location ->
+                new WinFlag(location, () -> javafx.application.Platform.runLater(switchToEditor::run)));
+
         double tileSize = data.getTileSize();
         // Expand the world to fit every placed tile and pickup so nothing is clipped on load
         for (TileEntry tile : data.getTiles()) {
@@ -89,6 +96,8 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
                 player.setDebugListener(debugOverlay::setText);
             }
             addEntity(player);
+
+
         }
     }
 
