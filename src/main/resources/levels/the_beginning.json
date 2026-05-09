@@ -3,7 +3,7 @@
   "tileSize": 100.0,
   "spawn": {
     "gridX": 6,
-    "gridY": -29
+    "gridY": -31
   },
   "tiles": [
     {
@@ -13,11 +13,6 @@
     },
     {
       "gridX": 5,
-      "gridY": -29,
-      "type": "floor"
-    },
-    {
-      "gridX": 6,
       "gridY": -29,
       "type": "floor"
     },
@@ -443,16 +438,6 @@
     },
     {
       "gridX": 48,
-      "gridY": -29,
-      "type": "floor"
-    },
-    {
-      "gridX": 49,
-      "gridY": -29,
-      "type": "floor"
-    },
-    {
-      "gridX": 50,
       "gridY": -29,
       "type": "floor"
     },
@@ -1807,11 +1792,6 @@
       "type": "wall_filling"
     },
     {
-      "gridX": 57,
-      "gridY": -30,
-      "type": "wall_filling"
-    },
-    {
       "gridX": 58,
       "gridY": -32,
       "type": "wall_filling"
@@ -2910,6 +2890,86 @@
       "gridX": 50,
       "gridY": -24,
       "type": "wall_filling"
+    },
+    {
+      "gridX": 57,
+      "gridY": -30,
+      "type": "wall_filling"
+    },
+    {
+      "gridX": 49,
+      "gridY": -30,
+      "type": "wall_right"
+    },
+    {
+      "gridX": 49,
+      "gridY": -31,
+      "type": "wall_right"
+    },
+    {
+      "gridX": 49,
+      "gridY": -32,
+      "type": "wall_right"
+    },
+    {
+      "gridX": 49,
+      "gridY": -33,
+      "type": "wall_right"
+    },
+    {
+      "gridX": 49,
+      "gridY": -34,
+      "type": "wall_right"
+    },
+    {
+      "gridX": 49,
+      "gridY": -35,
+      "type": "corner_top_left"
+    },
+    {
+      "gridX": 50,
+      "gridY": -35,
+      "type": "corner_top_right"
+    },
+    {
+      "gridX": 50,
+      "gridY": -34,
+      "type": "wall_left"
+    },
+    {
+      "gridX": 50,
+      "gridY": -33,
+      "type": "wall_left"
+    },
+    {
+      "gridX": 50,
+      "gridY": -32,
+      "type": "wall_left"
+    },
+    {
+      "gridX": 50,
+      "gridY": -31,
+      "type": "wall_left"
+    },
+    {
+      "gridX": 50,
+      "gridY": -30,
+      "type": "wall_left"
+    },
+    {
+      "gridX": 49,
+      "gridY": -29,
+      "type": "inner_corner_bottom_right"
+    },
+    {
+      "gridX": 50,
+      "gridY": -29,
+      "type": "inner_corner_bottom_left"
+    },
+    {
+      "gridX": 6,
+      "gridY": -29,
+      "type": "floor"
     }
   ],
   "pickups": [
@@ -2924,6 +2984,12 @@
       "gridX": 23,
       "gridY": -30,
       "type": "blue_shroom"
+    },
+    {
+      "config": {},
+      "gridX": 53,
+      "gridY": -37,
+      "type": "win_flag"
     }
   ],
   "texts": [

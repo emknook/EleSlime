@@ -64,7 +64,7 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
         // Register win_flag with the win callback before building the level.
         // This overrides the null placeholder registered in PickupRegistrar.
         registry.register("win_flag", location ->
-                new WinFlag(location, () -> javafx.application.Platform.runLater(switchToEditor::run)));
+                new WinFlag(location, () -> javafx.application.Platform.runLater(switchToEditor)));
 
         double tileSize = data.getTileSize();
         // Expand the world to fit every placed tile and pickup so nothing is clipped on load
@@ -82,14 +82,15 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
             );
             expandWorldIfNeeded(spawnWorldPos.getX(), spawnWorldPos.getY());
             Player player = new Player(spawnWorldPos, 3);
-            addEntity(new HealthDisplay(new Coordinate2D(getViewportWidth() - 80, 35), player), true);
+            // HealthDisplay: anchored top-left at (10, 10)
+            addEntity(new HealthDisplay(new Coordinate2D(10, 10), player), true);
             player.setPositionListener(pos -> {
                 expandWorldIfNeeded(pos.getX(), pos.getY());
                 updateCameraPosition(pos);
             });
 
             if (EleSlime.DEBUG) {
-                TextEntity debugOverlay = new TextEntity(new Coordinate2D(10, 10));
+                TextEntity debugOverlay = new TextEntity(new Coordinate2D(10, 80));
                 debugOverlay.setFont(Font.font("Monospaced", FontWeight.BOLD, 12));
                 debugOverlay.setFill(Color.LIME);
                 addEntity(debugOverlay, true);
