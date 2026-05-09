@@ -4,12 +4,15 @@ import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.entities.YaegerEntity;
 import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.entities.decorational.InformationText;
+import nl.han.jefmk.entities.obstacles.MovingPlatform;
 import nl.han.jefmk.entities.obstacles.Obstacle;
 import nl.han.jefmk.entities.pickups.Pickup;
 import nl.han.jefmk.levels.model.GridEntry;
 import nl.han.jefmk.levels.model.LevelData;
+import nl.han.jefmk.levels.model.ObstacleEntry;
 import nl.han.jefmk.levels.model.TextEntry;
 
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -65,7 +68,20 @@ public class LevelBuilder {
     }
 
     public YaegerEntity build(GridEntry entry, double tileSize) {
+        if (entry instanceof ObstacleEntry oe && "moving_platform".equals(oe.getType())) {
+            return buildMovingPlatform(oe, tileSize);
+        }
         return registry.create(entry.getType(), toLocation(entry, tileSize));
+    }
+
+    private YaegerEntity buildMovingPlatform(ObstacleEntry entry, double tileSize) {
+        Map<String, Object> config = entry.getConfig();
+        int endGridX = ((Number) config.getOrDefault("endGridX", entry.getGridX())).intValue();
+        int endGridY = ((Number) config.getOrDefault("endGridY", entry.getGridY())).intValue();
+        double speed = ((Number) config.getOrDefault("speed", 1.0)).doubleValue();
+        Coordinate2D startLocation = toLocation(entry, tileSize);
+        Coordinate2D endLocation = new Coordinate2D(endGridX * tileSize, EleSlime.Y_OFFSET + endGridY * tileSize);
+        return new MovingPlatform(startLocation, endLocation, speed);
     }
 
     private Coordinate2D toLocation(GridEntry entry, double tileSize) {

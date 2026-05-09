@@ -1,5 +1,6 @@
 package nl.han.jefmk.levels.registration;
 
+import nl.han.jefmk.entities.obstacles.Lava;
 import nl.han.jefmk.entities.obstacles.Stalagmite;
 import nl.han.jefmk.entities.obstacles.Sulphur;
 import nl.han.jefmk.levels.EntitySupplier;
@@ -11,7 +12,9 @@ public class ObstacleRegistrar {
 
     private static final List<ObstacleDefinition> OBSTACLE_DEFINITIONS = List.of(
             new ObstacleDefinition("stalagmite", "sprites/stalagmite.png", Stalagmite::new),
-            new ObstacleDefinition("sulphur", "sprites/sulphur.png", Sulphur::new)
+            new ObstacleDefinition("sulphur", "sprites/sulphur.png", Sulphur::new),
+            new ObstacleDefinition("moving_platform", "sprites/moving-platform.png", null),
+            new ObstacleDefinition("lava", "sprites/lava-still.png", Lava::new)
     );
 
     private static final List<String> TYPE_IDS = OBSTACLE_DEFINITIONS.stream()
@@ -24,7 +27,9 @@ public class ObstacleRegistrar {
 
     public static void registerAll(LevelRegistry registry) {
         for (ObstacleDefinition definition : OBSTACLE_DEFINITIONS) {
-            registry.register(definition.typeId(), definition.supplier());
+            if (definition.supplier() != null) {
+                registry.register(definition.typeId(), definition.supplier());
+            }
         }
     }
 

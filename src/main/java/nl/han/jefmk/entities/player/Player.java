@@ -12,6 +12,7 @@ import nl.han.jefmk.entities.HasHealth;
 import nl.han.jefmk.entities.Health;
 import nl.han.jefmk.entities.obstacles.Obstacle;
 import nl.han.jefmk.score.Score;
+import nl.han.jefmk.surfaces.SurfaceOwner;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -35,6 +36,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private final Set<KeyCode> currentPressedKeys = new HashSet<>();
 
     private Direction attachedSurfaceDirection = null;
+    private SurfaceOwner standingOwner = null;
 
     private double horizontalSpeed = 0d;
     private double verticalSpeed = 0d;
@@ -147,6 +149,10 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
         playerSprite.jump(attachedSurfaceDirection);
         attachedSurfaceDirection = null;
+    }
+
+    public void setStandingOwner(SurfaceOwner owner) {
+        this.standingOwner = owner;
     }
 
     public void addTouchingSurfaceDirection(Direction direction) {
@@ -272,8 +278,11 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         applyInputMovement();
         applyGravity(dt);
 
+        double platformCarryX = (attachedSurfaceDirection == Direction.DOWN && standingOwner != null)
+                ? standingOwner.getDeltaX() : 0;
+
         setAnchorLocation(new Coordinate2D(
-                getAnchorLocation().getX() + horizontalSpeed * dt,
+                getAnchorLocation().getX() + horizontalSpeed * dt + platformCarryX,
                 getAnchorLocation().getY() + verticalSpeed * dt
         ));
 
@@ -287,6 +296,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
             StringBuilder sb = new StringBuilder();
             sb.append("attached : ").append(attachedSurfaceDirection).append("\n");
             sb.append("touching : ").append(touchingSurfaceDirections).append("\n");
+            sb.append("standing : ").append(standingOwner == null ? "null" : standingOwner.getClass().getSimpleName()).append("\n");
+            sb.append("carryX   : ").append(String.format("%.2f", platformCarryX)).append("\n");
             if (!collidingTileDescriptions.isEmpty()) {
                 sb.append("collisions:\n");
                 collidingTileDescriptions.forEach(d -> sb.append("  ").append(d).append("\n"));
@@ -330,6 +341,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     public void clearTouchingSurfaceDirections() {
         touchingSurfaceDirections.clear();
         collidingTileDescriptions.clear();
+        standingOwner = null;
     }
 
     public void takeKnockback(Obstacle obstacle) {

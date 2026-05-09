@@ -4,8 +4,9 @@ import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.entities.CompositeEntity;
 import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.impl.SpriteEntity;
+import nl.han.jefmk.EleSlime;
 
-public class Tile extends CompositeEntity {
+public class Tile extends CompositeEntity implements SurfaceOwner {
 
     private final TileType type;
 
@@ -55,5 +56,15 @@ public class Tile extends CompositeEntity {
             default:
                 break;
         }
+    }
+
+    @Override
+    public double getHeight() {
+        return EleSlime.TILE_SIZE;
+    }
+
+    @Override
+    public double getWidth() {
+        return EleSlime.TILE_SIZE;
     }
 }

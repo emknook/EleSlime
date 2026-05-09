@@ -113,6 +113,20 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         }
         expandWorldIfNeeded(spawn.getGridX(), spawn.getGridY());
         levelBuilder.buildFromData(toLevelData(), this::addPlacedEntity, this::addEntity);
+
+        // Add end-position indicators for any loaded moving platforms
+        for (ObstacleEntry oe : obstacleEntries) {
+            if ("moving_platform".equals(oe.getType()) && oe.getConfig() != null) {
+                int endX = ((Number) oe.getConfig().getOrDefault("endGridX", oe.getGridX())).intValue();
+                int endY = ((Number) oe.getConfig().getOrDefault("endGridY", oe.getGridY())).intValue();
+                Coordinate2D endPixel = new Coordinate2D(endX * TILE_SIZE, EleSlime.Y_OFFSET + endY * TILE_SIZE);
+                GhostPreview indicator = new GhostPreview("sprites/moving-platform.png", endPixel);
+                indicator.setOpacity(0.35);
+                placedEntities.put(key("platform_end", oe.getGridX(), oe.getGridY()), indicator);
+                addEntity(indicator);
+            }
+        }
+
         setupUI();
         setupGhosts();
 
@@ -278,11 +292,66 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     }
 
     private void placeObstacle(int gridX, int gridY) {
+        String typeId = currentObstacleTypeId();
+        if ("moving_platform".equals(typeId)) {
+            placeMovingPlatform(gridX, gridY);
+            return;
+        }
         removeObstacleAt(gridX, gridY);
         expandWorldIfNeeded(gridX, gridY);
-        ObstacleEntry entry = new ObstacleEntry(gridX, gridY, currentObstacleTypeId());
+        ObstacleEntry entry = new ObstacleEntry(gridX, gridY, typeId);
         obstacleEntries.add(entry);
         addPlacedEntity(entry, levelBuilder.build(entry, TILE_SIZE));
+    }
+
+    private void placeMovingPlatform(int gridX, int gridY) {
+        TextInputDialog endXDialog = new TextInputDialog(String.valueOf(gridX + 5));
+        endXDialog.setTitle("Moving Platform");
+        endXDialog.setHeaderText("End position & speed");
+        endXDialog.setContentText("End grid X:");
+        endXDialog.showAndWait().ifPresent(endXStr -> {
+            TextInputDialog endYDialog = new TextInputDialog(String.valueOf(gridY));
+            endYDialog.setTitle("Moving Platform");
+            endYDialog.setHeaderText(null);
+            endYDialog.setContentText("End grid Y:");
+            endYDialog.showAndWait().ifPresent(endYStr -> {
+                TextInputDialog speedDialog = new TextInputDialog("2.0");
+                speedDialog.setTitle("Moving Platform");
+                speedDialog.setHeaderText(null);
+                speedDialog.setContentText("Speed (tiles/sec):");
+                speedDialog.showAndWait().ifPresent(speedStr -> {
+                    try {
+                        int endX = Integer.parseInt(endXStr.trim());
+                        int endY = Integer.parseInt(endYStr.trim());
+                        double speed = Double.parseDouble(speedStr.trim());
+
+                        removeObstacleAt(gridX, gridY);
+                        expandWorldIfNeeded(gridX, gridY);
+                        expandWorldIfNeeded(endX, endY);
+
+                        ObstacleEntry entry = new ObstacleEntry(gridX, gridY, "moving_platform");
+                        Map<String, Object> config = new HashMap<>();
+                        config.put("endGridX", endX);
+                        config.put("endGridY", endY);
+                        config.put("speed", speed);
+                        entry.setConfig(config);
+                        obstacleEntries.add(entry);
+
+                        YaegerEntity entity = levelBuilder.build(entry, TILE_SIZE);
+                        addPlacedEntity(entry, entity);
+
+                        // Show a ghost at the end position so the travel range is visible
+                        Coordinate2D endPixel = new Coordinate2D(endX * TILE_SIZE, EleSlime.Y_OFFSET + endY * TILE_SIZE);
+                        GhostPreview indicator = new GhostPreview("sprites/moving-platform.png", endPixel);
+                        indicator.setOpacity(0.35);
+                        placedEntities.put(key("platform_end", gridX, gridY), indicator);
+                        addEntity(indicator);
+                    } catch (NumberFormatException ignored) {
+                        // Invalid input — do nothing
+                    }
+                });
+            });
+        });
     }
 
     private void placeText(int gridX, int gridY) {
@@ -338,6 +407,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
 
     private void removeObstacleAt(int gridX, int gridY) {
         removeEntity("obstacle", gridX, gridY);
+        removeEntity("platform_end", gridX, gridY);
         obstacleEntries.removeIf(e -> e.getGridX() == gridX && e.getGridY() == gridY);
     }
 
