@@ -4,6 +4,8 @@ import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.entities.YaegerEntity;
 import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.entities.decorational.InformationText;
+import nl.han.jefmk.entities.obstacles.Obstacle;
+import nl.han.jefmk.entities.pickups.Pickup;
 import nl.han.jefmk.levels.model.GridEntry;
 import nl.han.jefmk.levels.model.LevelData;
 import nl.han.jefmk.levels.model.TextEntry;
@@ -31,11 +33,25 @@ public class LevelBuilder {
         }
 
         for (GridEntry entry : data.getPickups()) {
-            entityAdder.accept(entry, build(entry, tileSize));
+            YaegerEntity entity = build(entry, tileSize);
+            if (entity instanceof Pickup pickup) {
+                entityAdder.accept(entry, pickup.getPickupCollider());
+            }
+            entityAdder.accept(entry, entity);
         }
 
         for (GridEntry entry : data.getMobs()) {
             entityAdder.accept(entry, build(entry, tileSize));
+        }
+
+        if (data.getObstacles() != null) {
+            for (GridEntry entry : data.getObstacles()) {
+                YaegerEntity entity = build(entry, tileSize);
+                if (entity instanceof Obstacle obstacle) {
+                    entityAdder.accept(entry, obstacle.getObstacleCollider());
+                }
+                entityAdder.accept(entry, entity);
+            }
         }
 
         if (textAdder != null && data.getTexts() != null) {

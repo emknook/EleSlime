@@ -8,14 +8,16 @@ import com.github.hanyaeger.api.entities.DynamicCompositeEntity;
 import com.github.hanyaeger.api.userinput.KeyListener;
 import javafx.scene.input.KeyCode;
 import nl.han.jefmk.EleSlime;
+import nl.han.jefmk.entities.HasHealth;
+import nl.han.jefmk.entities.Health;
+import nl.han.jefmk.entities.obstacles.Obstacle;
 import nl.han.jefmk.score.Score;
-
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class Player extends DynamicCompositeEntity implements KeyListener, Collider {
+public class Player extends DynamicCompositeEntity implements KeyListener, Collider, HasHealth {
 
     private static final double AIR_MOVEMENT_SPEED = 400d;    // px/s
     private static final double SURFACE_MOVEMENT_SPEED = 400d; // px/s
@@ -36,8 +38,9 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     private double horizontalSpeed = 0d;
     private double verticalSpeed = 0d;
+    private double knockbackTime = 0d;  // seconds
 
-    private int health;
+    private final Health health;
 
     private Consumer<Coordinate2D> positionListener;
     private Consumer<String> debugListener;
@@ -47,10 +50,10 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private PlayerSprite playerSprite;
     private final Coordinate2D spawn;
 
-    public Player(final Coordinate2D initialLocation) {
+    public Player(final Coordinate2D initialLocation, int initialHealth) {
         super(initialLocation);
         this.spawn = initialLocation;
-        health = 3;
+        this.health = new Health(initialHealth);
     }
 
     public void setPositionListener(Consumer<Coordinate2D> listener) {
@@ -150,21 +153,54 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         touchingSurfaceDirections.add(direction);
     }
 
+    public boolean isFalling() {
+        return verticalSpeed > 0;
+    }
+
+    public void endKnockback() {
+        knockbackTime = 0;
+        horizontalSpeed = 0;
+    }
+
+    @Override
     public void takeDamage() {
-        health--;
-        Score.getInstance().resetForDeath();
-        this.setAnchorLocation(new Coordinate2D(spawn.getX(), spawn.getY() - this.getHeight()));
+        if (health.damage()) {
+            checkForDeath();
+        }
     }
 
+    private void checkForDeath() {
+        if (health.get() <= 0) {
+            Score.getInstance().resetForDeath();
+            this.setAnchorLocation(new Coordinate2D(spawn.getX(), spawn.getY() - this.getHeight()));
+
+            verticalSpeed = 0;
+            horizontalSpeed = 0;
+        }
+    }
+
+    @Override
     public void regainHealth() {
-        health++;
+        health.regain();
     }
 
+    @Override
     public int getHealth() {
-        return health;
+        return health.get();
+    }
+
+    @Override
+    public void addHealthListener(Consumer<Integer> listener) {
+        health.addListener(listener);
     }
 
     public void updateAttachedSurface() {
+        // Block surface attachment while in knockback state
+        if (knockbackTime > 0) {
+            attachedSurfaceDirection = null;
+            return;
+        }
+        
         Direction previousAttached = attachedSurfaceDirection;
         if (touchingSurfaceDirections.contains(Direction.LEFT) && (currentPressedKeys.contains(KeyCode.LEFT) || attachedSurfaceDirection == Direction.LEFT) && !currentPressedKeys.contains(KeyCode.RIGHT)) {
             attachedSurfaceDirection = Direction.LEFT;
@@ -193,6 +229,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     }
 
     private void applyInputMovement() {
+        if (knockbackTime > 0) return;
+
         if (currentPressedKeys.contains(KeyCode.SPACE) && attachedSurfaceDirection != null) {
             jumpAwayFromSurface();
             return;
@@ -221,6 +259,13 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         }
         double dt = Math.min((timestamp - lastTimestamp) / 1_000_000_000.0, MAX_DELTA);
         lastTimestamp = timestamp;
+
+        knockbackTime -= dt;
+
+        if (knockbackTime > 0) {
+            // Gradually reduce horizontal velocity during knockback
+            horizontalSpeed *= Math.pow(0.02, dt);
+        }
 
         updateAttachedSurface();
         updateRotationBasedOnAttachedSurface();
@@ -285,5 +330,27 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     public void clearTouchingSurfaceDirections() {
         touchingSurfaceDirections.clear();
         collidingTileDescriptions.clear();
+    }
+
+    public void takeKnockback(Obstacle obstacle) {
+        // Calculate horizontal knockback direction (away from obstacle)
+        double obstacleX = obstacle.getAnchorLocation().getX();
+        double playerX = this.getAnchorLocation().getX();
+        
+        if (obstacleX < playerX) {
+            // Obstacle is to the left, knock player right
+            horizontalSpeed = AIR_MOVEMENT_SPEED * 1.5;
+        } else {
+            // Obstacle is to the right, knock player left
+            horizontalSpeed = -AIR_MOVEMENT_SPEED * 1.5;
+        }
+        
+        // Vertical knockback: throw upward at jump speed
+        verticalSpeed = -JUMP_SPEED;
+        
+        // Clear attached surface so player enters air state and gravity applies
+        attachedSurfaceDirection = null;
+        knockbackTime = 1.5;  // Knockback duration in seconds
+        touchingSurfaceDirections.clear();
     }
 }

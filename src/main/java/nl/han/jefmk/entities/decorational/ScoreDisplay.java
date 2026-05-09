@@ -1,5 +1,6 @@
 package nl.han.jefmk.entities.decorational;
 
+import com.github.hanyaeger.api.AnchorPoint;
 import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.Timer;
 import com.github.hanyaeger.api.TimerContainer;
@@ -19,6 +20,7 @@ public class ScoreDisplay extends DynamicTextEntity implements TimerContainer {
         super(initialLocation);
         setFont(Font.font("Monospaced", FontWeight.BOLD, 18));
         setFill(Color.WHITE);
+        setAnchorPoint(AnchorPoint.TOP_RIGHT);
         updateDisplay();
     }
 

@@ -6,6 +6,7 @@ import com.github.hanyaeger.api.TimerContainer;
 import com.github.hanyaeger.api.entities.Animation;
 import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.LoopingAnimation;
+import nl.han.jefmk.entities.player.Player;
 
 public class EnemySlime extends Slime implements TimerContainer {
 
@@ -20,7 +21,7 @@ public class EnemySlime extends Slime implements TimerContainer {
     private int xLocation = 0;
 
     public EnemySlime(Coordinate2D initialLocation) {
-        super("sprites/enemy-spritesheet.png", initialLocation, 2, 9);
+        super("sprites/enemy-spritesheet.png", initialLocation, 2, 9, 1);
         idleLeft();
     }
 
@@ -65,6 +66,11 @@ public class EnemySlime extends Slime implements TimerContainer {
     @Override
     public void setupTimers() {
         addTimer(new MovingTimer(700));
+    }
+
+    @Override
+    public void onPlayerCollision(Player player) {
+        player.takeDamage();
     }
 
     private class MovingTimer extends Timer {

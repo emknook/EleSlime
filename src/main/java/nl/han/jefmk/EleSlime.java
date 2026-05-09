@@ -6,6 +6,7 @@ import javafx.application.Platform;
 
 import nl.han.jefmk.levels.LevelRegistry;
 import nl.han.jefmk.levels.registration.MobRegistrar;
+import nl.han.jefmk.levels.registration.ObstacleRegistrar;
 import nl.han.jefmk.levels.registration.PickupRegistrar;
 import nl.han.jefmk.levels.registration.TileRegistrar;
 import nl.han.jefmk.scenes.GameScene;
@@ -14,7 +15,7 @@ import nl.han.jefmk.levels.editor.LevelSelectScene;
 
 public class EleSlime extends YaegerGame {
 
-    public final static boolean DEBUG = false;
+    public final static boolean DEBUG = true;
     public final static double TILE_SIZE = 100;
     public final static double MOB_SIZE = 80;
 
@@ -33,6 +34,7 @@ public class EleSlime extends YaegerGame {
         TileRegistrar.registerAll(registry);
         PickupRegistrar.registerAll(registry);
         MobRegistrar.registerAll(registry);
+        ObstacleRegistrar.registerAll(registry);
     }
 
     @Override
