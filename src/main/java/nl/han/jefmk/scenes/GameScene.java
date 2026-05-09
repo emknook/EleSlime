@@ -99,7 +99,9 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
             addEntity(player);
 
 
+            registry.register("enemy_slime", location -> new EnemySlime(location, player));
         }
+        builder.buildFromData(data, (entry, entity) -> addEntity(entity), this::addEntity);
     }
 
     public void createLightningBolt(final Coordinate2D coordinate2D, final double rotation, final int bouncesLeft) {
