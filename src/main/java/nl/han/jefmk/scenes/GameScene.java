@@ -2,7 +2,6 @@ package nl.han.jefmk.scenes;
 
 import com.github.hanyaeger.api.Coordinate2D;
 import com.github.hanyaeger.api.Size;
-import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.impl.TextEntity;
 import com.github.hanyaeger.api.scenes.ScrollableDynamicScene;
 import com.github.hanyaeger.api.userinput.KeyListener;
@@ -94,8 +93,8 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
         }
     }
 
-    public void createLightningBolt(final Coordinate2D coordinate2D, final Direction direction) {
-        var lightningBolt = new Lightning(coordinate2D, direction);
+    public void createLightningBolt(final Coordinate2D coordinate2D, final double rotation, final int bouncesLeft) {
+        var lightningBolt = new Lightning(coordinate2D, rotation, this, bouncesLeft);
         addEntity(lightningBolt);
     }
 

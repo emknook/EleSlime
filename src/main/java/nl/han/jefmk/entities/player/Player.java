@@ -28,7 +28,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private static final double GRAVITY = 2880d;               // px/s²
     private static final double MAX_DELTA = 1.0 / 20.0;       // clamp to 20 fps minimum
     private static final double STICKY_RADIUS_MULTIPLIER = 1.04d;
-    private static final double SPRITE_COLLIDER_BOTTOM_OFFSET = 7d;
+    private static final double SPRITE_COLLIDER_BOTTOM_OFFSET = 0d;
 
     private long lastTimestamp = -1;
 
@@ -110,9 +110,9 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     private void handleHorizontalSurfaceMovement(final Set<KeyCode> pressedKeys) {
         horizontalSpeed = 0;
-        if (pressedKeys.contains(KeyCode.LEFT)) {
+        if (pressedKeys.contains(KeyCode.LEFT) || pressedKeys.contains(KeyCode.A)) {
             horizontalSpeed = -SURFACE_MOVEMENT_SPEED;
-        } else if (pressedKeys.contains(KeyCode.RIGHT)) {
+        } else if (pressedKeys.contains(KeyCode.RIGHT)  || pressedKeys.contains(KeyCode.D)) {
             horizontalSpeed = SURFACE_MOVEMENT_SPEED;
         }
         verticalSpeed = 0;
@@ -120,9 +120,9 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     private void handleVerticalSurfaceMovement(final Set<KeyCode> pressedKeys) {
         verticalSpeed = 0;
-        if (pressedKeys.contains(KeyCode.UP)) {
+        if (pressedKeys.contains(KeyCode.UP) || pressedKeys.contains(KeyCode.W)) {
             verticalSpeed = -SURFACE_MOVEMENT_SPEED;
-        } else if (pressedKeys.contains(KeyCode.DOWN)) {
+        } else if (pressedKeys.contains(KeyCode.DOWN) || pressedKeys.contains(KeyCode.S)) {
             verticalSpeed = SURFACE_MOVEMENT_SPEED;
         }
         horizontalSpeed = 0;
@@ -313,7 +313,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     private void spawnLightningBolt() {
         shootingTime = 1.0d; //can shoot once per second
-        level.createLightningBolt(new Coordinate2D(getAnchorLocation().getX() + getWidth(), getAnchorLocation().getY() + getHeight() / 2), Direction.RIGHT);
+        level.createLightningBolt(new Coordinate2D(getAnchorLocation().getX() + getWidth(), getAnchorLocation().getY() + getHeight() / 2), this.getRotationForProjectile(), 3);
     }
 
     private void determineSpriteAnimation() {
@@ -349,6 +349,17 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     public void clearTouchingSurfaceDirections() {
         touchingSurfaceDirections.clear();
         collidingTileDescriptions.clear();
+    }
+
+    public double getRotationForProjectile() {
+        switch (playerSprite.getMovingState()) {
+            case MOVING_LEFT, IDLE_LEFT, JUMPING_LEFT -> {
+                return this.playerSprite.getRotation() - 180;
+            }
+            default -> {
+                return this.playerSprite.getRotation();
+            }
+        }
     }
 
     public void takeKnockback(Obstacle obstacle) {
