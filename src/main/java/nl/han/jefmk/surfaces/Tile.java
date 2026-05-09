@@ -22,8 +22,6 @@ public class Tile extends CompositeEntity implements SurfaceOwner {
     @Override
     protected void setupEntities() {
         Coordinate2D thisLocation = new Coordinate2D(0, 0);
-        SpriteEntity sprite = new TileSprite(thisLocation, type);
-        addEntity(sprite);
         switch (type) {
             case CEILING:
                 addEntity(new SurfaceCollider(thisLocation, Direction.UP, this));
@@ -56,6 +54,8 @@ public class Tile extends CompositeEntity implements SurfaceOwner {
             default:
                 break;
         }
+        SpriteEntity sprite = new TileSprite(thisLocation, type);
+        addEntity(sprite);
     }
 
     @Override

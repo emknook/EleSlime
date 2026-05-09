@@ -2938,7 +2938,8 @@
       "text": "Use the arrows to move"
     }
   ],
-  "mobs": [],
+  "mobs": [
+  ],
   "obstacles": [
     {
       "config": {},
