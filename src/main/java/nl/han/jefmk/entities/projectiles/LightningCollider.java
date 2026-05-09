@@ -28,20 +28,15 @@ public class LightningCollider extends RectangleEntity implements Collided {
     @Override
     public void onCollision(List<Collider> collidingObjects) {
         for (Collider collider : collidingObjects) {
-            switch (collider) {
-                case EnemySlime enemySlime -> {
-                    enemySlime.getHitByLightning();
-                    lightning.removePotentialTarget(enemySlime);
-                    lightning.chainEffect();
-                    lightning.remove();
-                }
-                case PlayerCollider playerCollider -> {
-                }
-                case PlayerStickyCollider playerStickyCollider -> {
-                }
-                case Player player -> {
-                }
-                case null, default -> lightning.remove();
+            if (collider instanceof EnemySlime enemySlime) {
+                enemySlime.getHitByLightning();
+                lightning.removePotentialTarget(enemySlime);
+                lightning.chainEffect();
+                lightning.remove();
+            } else if (collider instanceof Player || collider instanceof PlayerStickyCollider || collider instanceof PlayerCollider) {
+                //explicitly do nothing when touching player
+            } else {
+                lightning.remove();
             }
         }
     }
