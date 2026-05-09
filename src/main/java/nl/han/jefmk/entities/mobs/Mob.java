@@ -10,7 +10,7 @@ import com.github.hanyaeger.api.entities.impl.DynamicSpriteEntity;
 import nl.han.jefmk.entities.HasHealth;
 import nl.han.jefmk.entities.Health;
 import nl.han.jefmk.surfaces.SurfaceCollider;
-import nl.han.jefmk.surfaces.Tile;
+import nl.han.jefmk.surfaces.SurfaceOwner;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -53,19 +53,20 @@ public class Mob extends DynamicSpriteEntity implements Newtonian, Collider, Col
     }
 
     private void handleSurfaceCollision(SurfaceCollider surface) {
-        Tile tile = surface.getTile();
+        SurfaceOwner owner = surface.getOwner();
         switch(surface.getSurfaceDirection()) {
             case Direction.UP:
-                this.setAnchorLocationY(tile.getAnchorLocation().getY() + tile.getHeight());
+                this.setAnchorLocationY(owner.getAnchorLocation().getY() + owner.getHeight());
                 break;
             case Direction.DOWN:
-                this.setAnchorLocationY(tile.getAnchorLocation().getY() - this.getHeight());
+                this.setAnchorLocationY(owner.getAnchorLocation().getY() - this.getHeight());
+                this.setAnchorLocationX(this.getAnchorLocation().getX() + owner.getDeltaX());
                 break;
             case Direction.LEFT:
-                this.setAnchorLocationX(tile.getAnchorLocation().getX() + tile.getWidth());
+                this.setAnchorLocationX(owner.getAnchorLocation().getX() + owner.getWidth());
                 break;
             case Direction.RIGHT:
-                this.setAnchorLocationX(tile.getAnchorLocation().getX() - this.getWidth());
+                this.setAnchorLocationX(owner.getAnchorLocation().getX() - this.getWidth());
                 break;
         }
     }

@@ -9,7 +9,7 @@ import javafx.scene.paint.Color;
 import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.entities.mobs.Slime;
 import nl.han.jefmk.surfaces.SurfaceCollider;
-import nl.han.jefmk.surfaces.Tile;
+import nl.han.jefmk.surfaces.SurfaceOwner;
 
 import java.util.HashSet;
 import java.util.List;
@@ -30,14 +30,14 @@ public class PlayerCollider extends CircleEntity implements Collided {
     public void onCollision(List<Collider> collidingObjects) {
         // Resolve vertical surfaces first; track which tiles were vertically resolved so
         // horizontal surfaces on the same tile (corner tiles) don't incorrectly snap the player sideways.
-        Set<Tile> verticallyResolved = new HashSet<>();
+        Set<SurfaceOwner> verticallyResolved = new HashSet<>();
 
         for (Collider collider : collidingObjects) {
             if (collider instanceof SurfaceCollider surface) {
                 Direction dir = surface.getSurfaceDirection();
                 if (dir == Direction.UP || dir == Direction.DOWN) {
                     handleSurfaceCollision(surface);
-                    verticallyResolved.add(surface.getTile());
+                    verticallyResolved.add(surface.getOwner());
                 }
             }
         }
@@ -46,7 +46,7 @@ public class PlayerCollider extends CircleEntity implements Collided {
             if (collider instanceof SurfaceCollider surface) {
                 Direction dir = surface.getSurfaceDirection();
                 if ((dir == Direction.LEFT || dir == Direction.RIGHT)
-                        && !verticallyResolved.contains(surface.getTile())) {
+                        && !verticallyResolved.contains(surface.getOwner())) {
                     handleSurfaceCollision(surface);
                 }
             }
@@ -57,25 +57,25 @@ public class PlayerCollider extends CircleEntity implements Collided {
     }
 
     private void handleSurfaceCollision(SurfaceCollider surface) {
-        Tile tile = surface.getTile();
+        SurfaceOwner owner = surface.getOwner();
         if (EleSlime.DEBUG) {
-            player.addCollidingTile(tile.getType().name() + " ← " + surface.getSurfaceDirection().name());
+            player.addCollidingTile(owner.getClass().getSimpleName() + " ← " + surface.getSurfaceDirection().name());
         }
         switch(surface.getSurfaceDirection()) {
             case Direction.UP:
-                player.setAnchorLocationY(tile.getAnchorLocation().getY() + tile.getHeight());
+                player.setAnchorLocationY(owner.getAnchorLocation().getY() + owner.getHeight());
                 break;
             case Direction.DOWN:
-                player.setAnchorLocationY(tile.getAnchorLocation().getY() - player.getHeight());
+                player.setAnchorLocationY(owner.getAnchorLocation().getY() - player.getHeight());
                 if (player.isFalling()) {
                     player.endKnockback();
                 }
                 break;
             case Direction.LEFT:
-                player.setAnchorLocationX(tile.getAnchorLocation().getX() + tile.getWidth());
+                player.setAnchorLocationX(owner.getAnchorLocation().getX() + owner.getWidth());
                 break;
             case Direction.RIGHT:
-                player.setAnchorLocationX(tile.getAnchorLocation().getX() - player.getWidth());
+                player.setAnchorLocationX(owner.getAnchorLocation().getX() - player.getWidth());
                 break;
         }
     }

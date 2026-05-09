@@ -8,7 +8,7 @@ import com.github.hanyaeger.api.entities.impl.CircleEntity;
 import javafx.scene.paint.Color;
 import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.surfaces.SurfaceCollider;
-import nl.han.jefmk.surfaces.Tile;
+import nl.han.jefmk.surfaces.SurfaceOwner;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,22 +28,25 @@ public class PlayerStickyCollider extends CircleEntity implements Collided {
     public void onCollision(List<Collider> collidingObjects) {
         // First pass: register vertical surface contacts and track which tiles provided them.
         // This prevents a corner tile's horizontal surface from overriding the vertical attachment.
-        HashSet<Tile> verticallyTouched = new HashSet<>();
+        HashSet<SurfaceOwner> verticallyTouched = new HashSet<>();
         for (Collider collider : collidingObjects) {
             if (collider instanceof SurfaceCollider surface) {
                 var dir = surface.getSurfaceDirection();
                 if (dir == Direction.UP || dir == Direction.DOWN) {
                     player.addTouchingSurfaceDirection(dir);
-                    verticallyTouched.add(surface.getTile());
+                    verticallyTouched.add(surface.getOwner());
+                    if (dir == Direction.DOWN) {
+                        player.setStandingOwner(surface.getOwner());
+                    }
                 }
             }
         }
-        // Second pass: only register horizontal contacts for tiles not already handled vertically.
+        // Second pass: only register horizontal contacts for owners not already handled vertically.
         for (Collider collider : collidingObjects) {
             if (collider instanceof SurfaceCollider surface) {
                 var dir = surface.getSurfaceDirection();
                 if ((dir == Direction.LEFT || dir == Direction.RIGHT)
-                        && !verticallyTouched.contains(surface.getTile())) {
+                        && !verticallyTouched.contains(surface.getOwner())) {
                     player.addTouchingSurfaceDirection(dir);
                 }
             }

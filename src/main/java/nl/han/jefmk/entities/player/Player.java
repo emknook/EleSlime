@@ -13,6 +13,7 @@ import nl.han.jefmk.entities.Health;
 import nl.han.jefmk.entities.obstacles.Obstacle;
 import nl.han.jefmk.scenes.GameScene;
 import nl.han.jefmk.score.Score;
+import nl.han.jefmk.surfaces.SurfaceOwner;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -36,10 +37,10 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private final Set<KeyCode> currentPressedKeys = new HashSet<>();
 
     private Direction attachedSurfaceDirection = null;
+    private SurfaceOwner standingOwner = null;
 
     private double horizontalSpeed = 0d;
     private double verticalSpeed = 0d;
-    private double knockbackTime = 0d;  // seconds
     private double shootingTime = 0d;
 
     private final Health health;
@@ -115,7 +116,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         } else if (pressedKeys.contains(KeyCode.RIGHT)  || pressedKeys.contains(KeyCode.D)) {
             horizontalSpeed = SURFACE_MOVEMENT_SPEED;
         }
-        verticalSpeed = 0;
     }
 
     private void handleVerticalSurfaceMovement(final Set<KeyCode> pressedKeys) {
@@ -153,6 +153,10 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         attachedSurfaceDirection = null;
     }
 
+    public void setStandingOwner(SurfaceOwner owner) {
+        this.standingOwner = owner;
+    }
+
     public void addTouchingSurfaceDirection(Direction direction) {
         touchingSurfaceDirections.add(direction);
     }
@@ -162,7 +166,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     }
 
     public void endKnockback() {
-        knockbackTime = 0;
         horizontalSpeed = 0;
     }
 
@@ -199,12 +202,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     }
 
     public void updateAttachedSurface() {
-        // Block surface attachment while in knockback state
-        if (knockbackTime > 0) {
-            attachedSurfaceDirection = null;
-            return;
-        }
-        
         Direction previousAttached = attachedSurfaceDirection;
         if (touchingSurfaceDirections.contains(Direction.LEFT) && (currentPressedKeys.contains(KeyCode.LEFT) || attachedSurfaceDirection == Direction.LEFT) && !currentPressedKeys.contains(KeyCode.RIGHT)) {
             attachedSurfaceDirection = Direction.LEFT;
@@ -217,6 +214,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         } else {
             attachedSurfaceDirection = null;
         }
+
         if (previousAttached == null && attachedSurfaceDirection != null) {
             playerSprite.isNoLongerJumping();
         }
@@ -233,8 +231,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     }
 
     private void applyInputMovement() {
-        if (knockbackTime > 0) return;
-
         if (currentPressedKeys.contains(KeyCode.SPACE) && attachedSurfaceDirection != null) {
             jumpAwayFromSurface();
             return;
@@ -264,13 +260,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         double dt = Math.min((timestamp - lastTimestamp) / 1_000_000_000.0, MAX_DELTA);
         lastTimestamp = timestamp;
 
-        knockbackTime -= dt;
         shootingTime -= dt;
-
-        if (knockbackTime > 0) {
-            // Gradually reduce horizontal velocity during knockback
-            horizontalSpeed *= Math.pow(0.02, dt);
-        }
+      
         if (shootingTime < 0) {
             checkShootingPressed();
         }
@@ -280,8 +271,11 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         applyInputMovement();
         applyGravity(dt);
 
+        double platformCarryX = (attachedSurfaceDirection == Direction.DOWN && standingOwner != null)
+                ? standingOwner.getDeltaX() : 0;
+
         setAnchorLocation(new Coordinate2D(
-                getAnchorLocation().getX() + horizontalSpeed * dt,
+                getAnchorLocation().getX() + horizontalSpeed * dt + platformCarryX,
                 getAnchorLocation().getY() + verticalSpeed * dt
         ));
 
@@ -295,6 +289,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
             StringBuilder sb = new StringBuilder();
             sb.append("attached : ").append(attachedSurfaceDirection).append("\n");
             sb.append("touching : ").append(touchingSurfaceDirections).append("\n");
+            sb.append("standing : ").append(standingOwner == null ? "null" : standingOwner.getClass().getSimpleName()).append("\n");
+            sb.append("carryX   : ").append(String.format("%.2f", platformCarryX)).append("\n");
             if (!collidingTileDescriptions.isEmpty()) {
                 sb.append("collisions:\n");
                 collidingTileDescriptions.forEach(d -> sb.append("  ").append(d).append("\n"));
@@ -349,6 +345,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     public void clearTouchingSurfaceDirections() {
         touchingSurfaceDirections.clear();
         collidingTileDescriptions.clear();
+        standingOwner = null;
     }
 
     public double getRotationForProjectile() {
@@ -364,13 +361,13 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     public void takeKnockback(Obstacle obstacle) {
         // Calculate horizontal knockback direction (away from obstacle)
-        double obstacleX = obstacle.getAnchorLocation().getX();
+        double obstacleX = obstacle.getAnchorLocation().getX() + (obstacle.getWidth() / 2);
         double playerX = this.getAnchorLocation().getX();
         
-        if (obstacleX < playerX) {
+        if (obstacleX < playerX || currentPressedKeys.contains(KeyCode.RIGHT)) {
             // Obstacle is to the left, knock player right
             horizontalSpeed = AIR_MOVEMENT_SPEED * 1.5;
-        } else {
+        } else if(obstacleX > playerX ||  currentPressedKeys.contains(KeyCode.LEFT)) {
             // Obstacle is to the right, knock player left
             horizontalSpeed = -AIR_MOVEMENT_SPEED * 1.5;
         }
@@ -380,7 +377,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         
         // Clear attached surface so player enters air state and gravity applies
         attachedSurfaceDirection = null;
-        knockbackTime = 1.5;  // Knockback duration in seconds
         touchingSurfaceDirections.clear();
     }
 }
