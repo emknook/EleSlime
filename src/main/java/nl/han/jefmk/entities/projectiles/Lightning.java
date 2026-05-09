@@ -8,17 +8,19 @@ public class Lightning extends DynamicCompositeEntity {
 
     private final Direction direction;
 
+    private static final double SPEED = 10d;
+
     public Lightning(final Coordinate2D coordinate2D, final Direction direction) {
         super(coordinate2D);
         this.direction = direction;
-        setMotion(0, direction);
+        setMotion(SPEED, direction);
     }
 
     @Override
     protected void setupEntities() {
-        var lightningCollider = new LightningCollider(this.getAnchorLocation(), this.direction);
+        var lightningCollider = new LightningCollider(new Coordinate2D(0, 0), this.direction);
         addEntity(lightningCollider);
-        var lightningSprite = new LightningSprite( this.getAnchorLocation());
+        var lightningSprite = new LightningSprite(new Coordinate2D(0, 0));
         addEntity(lightningSprite);
     }
 }

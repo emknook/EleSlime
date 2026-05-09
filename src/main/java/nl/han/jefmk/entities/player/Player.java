@@ -313,7 +313,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     private void spawnLightningBolt() {
         shootingTime = 1.0d; //can shoot once per second
-        level.createLightningBolt(new Coordinate2D(this.getBoundingBox().getMaxX(), this.getBoundingBox().getCenterY()), Direction.RIGHT);
+        level.createLightningBolt(new Coordinate2D(getAnchorLocation().getX() + getWidth(), getAnchorLocation().getY() + getHeight() / 2), Direction.RIGHT);
     }
 
     private void determineSpriteAnimation() {
