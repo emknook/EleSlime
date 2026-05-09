@@ -8,6 +8,7 @@ import com.github.hanyaeger.api.entities.DynamicCompositeEntity;
 import com.github.hanyaeger.api.userinput.KeyListener;
 import javafx.scene.input.KeyCode;
 import nl.han.jefmk.EleSlime;
+import nl.han.jefmk.score.Score;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -23,6 +24,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private static final double WALL_JUMP_VERTICAL_SPEED = 300d; //px/s
     private static final double GRAVITY = 2880d;               // px/s²
     private static final double MAX_DELTA = 1.0 / 20.0;       // clamp to 20 fps minimum
+    private static final double STICKY_RADIUS_MULTIPLIER = 1.04d;
+    private static final double SPRITE_COLLIDER_BOTTOM_OFFSET = 7d;
 
     private long lastTimestamp = -1;
 
@@ -35,7 +38,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private double verticalSpeed = 0d;
 
     private int health;
-    private int score;
 
     private Consumer<Coordinate2D> positionListener;
     private Consumer<String> debugListener;
@@ -49,7 +51,6 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         super(initialLocation);
         this.spawn = initialLocation;
         health = 3;
-        score = 0;
     }
 
     public void setPositionListener(Consumer<Coordinate2D> listener) {
@@ -67,14 +68,23 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     @Override
     protected void setupEntities() {
         double bodyRadius = EleSlime.MOB_SIZE / 2;
-        Size spriteSize = new Size(bodyRadius * 2);
-        double stickyRadius = bodyRadius * 1.04;
+        Size spriteSize = createPlayerSpriteSize(bodyRadius);
+        double stickyRadius = bodyRadius * STICKY_RADIUS_MULTIPLIER;
         double stickyOffset = stickyRadius - bodyRadius;
 
         addEntity(new PlayerStickyCollider(this, stickyRadius, new Coordinate2D(0 - stickyOffset, 0 - stickyOffset)));
         addEntity(new PlayerCollider(this, bodyRadius, new Coordinate2D(0, 0)));
-        playerSprite = new PlayerSprite(spriteSize, new Coordinate2D(0, 0));
+        playerSprite = new PlayerSprite(spriteSize, new Coordinate2D(0, calculateSpriteOffsetY(bodyRadius, spriteSize)));
         addEntity(playerSprite);
+    }
+
+    private Size createPlayerSpriteSize(double bodyRadius) {
+        return new Size(bodyRadius * 2);
+    }
+
+    private double calculateSpriteOffsetY(double bodyRadius, Size spriteSize) {
+        double colliderDiameter = bodyRadius * 2;
+        return colliderDiameter - spriteSize.height() + SPRITE_COLLIDER_BOTTOM_OFFSET;
     }
 
     @Override
@@ -132,7 +142,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
             }
         }
 
-        playerSprite.jump();
+        playerSprite.jump(attachedSurfaceDirection);
         attachedSurfaceDirection = null;
     }
 
@@ -142,6 +152,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     public void takeDamage() {
         health--;
+        Score.getInstance().resetForDeath();
         this.setAnchorLocation(new Coordinate2D(spawn.getX(), spawn.getY() - this.getHeight()));
     }
 
@@ -149,19 +160,12 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         health++;
     }
 
-    public void addScore(int score) {
-        this.score += score;
-    }
-
-    public int getScore() {
-        return score;
-    }
-
     public int getHealth() {
         return health;
     }
 
     public void updateAttachedSurface() {
+        Direction previousAttached = attachedSurfaceDirection;
         if (touchingSurfaceDirections.contains(Direction.LEFT) && (currentPressedKeys.contains(KeyCode.LEFT) || attachedSurfaceDirection == Direction.LEFT) && !currentPressedKeys.contains(KeyCode.RIGHT)) {
             attachedSurfaceDirection = Direction.LEFT;
         } else if (touchingSurfaceDirections.contains(Direction.RIGHT) && (currentPressedKeys.contains(KeyCode.RIGHT) || attachedSurfaceDirection == Direction.RIGHT) && !currentPressedKeys.contains(KeyCode.LEFT)) {
@@ -172,6 +176,9 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
             attachedSurfaceDirection = Direction.DOWN;
         } else {
             attachedSurfaceDirection = null;
+        }
+        if (previousAttached == null && attachedSurfaceDirection != null) {
+            playerSprite.isNoLongerJumping();
         }
     }
 
@@ -246,33 +253,31 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     }
 
     private void determineSpriteAnimation() {
+        if (playerSprite.isJumping()) return;
+
         if (horizontalSpeed == 0 && verticalSpeed == 0) {
             playerSprite.setIdle();
-        } else {
-            if (attachedSurfaceDirection == null) {
-                return;
+            return;
+        }
+
+        if (attachedSurfaceDirection == null) return;
+
+        switch (attachedSurfaceDirection) {
+            case DOWN -> {
+                if (horizontalSpeed > 0) playerSprite.moveRight();
+                else if (horizontalSpeed < 0) playerSprite.moveLeft();
             }
-            if (horizontalSpeed > 0) {
-                switch (attachedSurfaceDirection) {
-                    case Direction.DOWN -> playerSprite.moveRight();
-                    case Direction.UP -> playerSprite.moveLeft();
-                }
-            } else if (horizontalSpeed < 0) {
-                switch (attachedSurfaceDirection) {
-                    case Direction.DOWN -> playerSprite.moveLeft();
-                    case Direction.UP -> playerSprite.moveRight();
-                }
+            case UP -> {
+                if (horizontalSpeed > 0) playerSprite.moveLeft();
+                else if (horizontalSpeed < 0) playerSprite.moveRight();
             }
-            if (verticalSpeed > 0) {
-                switch (attachedSurfaceDirection) {
-                    case LEFT -> playerSprite.moveRight();
-                    case RIGHT -> playerSprite.moveLeft();
-                }
-            } else {
-                switch (attachedSurfaceDirection) {
-                    case LEFT -> playerSprite.moveLeft();
-                    case RIGHT -> playerSprite.moveRight();
-                }
+            case LEFT -> {
+                if (verticalSpeed > 0) playerSprite.moveRight();
+                else if (verticalSpeed < 0) playerSprite.moveLeft();
+            }
+            case RIGHT -> {
+                if (verticalSpeed > 0) playerSprite.moveLeft();
+                else if (verticalSpeed < 0) playerSprite.moveRight();
             }
         }
     }

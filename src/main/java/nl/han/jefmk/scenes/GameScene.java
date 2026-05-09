@@ -10,8 +10,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import nl.han.jefmk.EleSlime;
+import nl.han.jefmk.entities.decorational.ScoreDisplay;
 import nl.han.jefmk.entities.player.Player;
 import nl.han.jefmk.levels.LevelBuilder;
+import nl.han.jefmk.score.Score;
 import nl.han.jefmk.levels.LevelLoader;
 import nl.han.jefmk.levels.LevelRegistry;
 import nl.han.jefmk.levels.model.LevelData;
@@ -42,6 +44,8 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
         setBackgroundColor(Color.rgb(39, 39, 68));
         // Start small; expands as the camera follows the player outward
         setSize(new Size(WORLD_MARGIN * 2, WORLD_MARGIN * 2));
+        Score.getInstance().resetForNewLevel();
+        addEntity(new ScoreDisplay(new Coordinate2D(10, 10)), true);
     }
 
     @Override

@@ -13,6 +13,7 @@ import nl.han.jefmk.entities.obstacles.Obstacle;
 import nl.han.jefmk.entities.pickups.BlueShroom;
 import nl.han.jefmk.entities.pickups.GreenShroom;
 import nl.han.jefmk.entities.pickups.Pickup;
+import nl.han.jefmk.score.Score;
 import nl.han.jefmk.surfaces.SurfaceCollider;
 import nl.han.jefmk.surfaces.Tile;
 
@@ -100,7 +101,7 @@ public class PlayerCollider extends CircleEntity implements Collided {
         if (pickup instanceof GreenShroom) {
             player.regainHealth();
         } else if (pickup instanceof BlueShroom) {
-            player.addScore(100);
+            Score.getInstance().addScore(100);
         }
     }
 

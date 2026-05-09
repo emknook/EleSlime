@@ -2617,7 +2617,50 @@
       "type": "wall_filling"
     }
   ],
-  "pickups": [],
+  "pickups": [
+    {
+      "config": {},
+      "gridX": 11,
+      "gridY": -30,
+      "type": "green_shroom"
+    },
+    {
+      "config": {},
+      "gridX": 15,
+      "gridY": -30,
+      "type": "green_shroom"
+    },
+    {
+      "config": {},
+      "gridX": 20,
+      "gridY": -30,
+      "type": "green_shroom"
+    },
+    {
+      "config": {},
+      "gridX": 23,
+      "gridY": -30,
+      "type": "blue_shroom"
+    },
+    {
+      "config": {},
+      "gridX": 19,
+      "gridY": -30,
+      "type": "green_shroom"
+    },
+    {
+      "config": {},
+      "gridX": 18,
+      "gridY": -30,
+      "type": "blue_shroom"
+    },
+    {
+      "config": {},
+      "gridX": 13,
+      "gridY": -30,
+      "type": "blue_shroom"
+    }
+  ],
   "texts": [
     {
       "gridX": 24,
