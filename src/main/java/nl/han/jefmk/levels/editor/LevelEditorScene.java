@@ -25,10 +25,7 @@ import nl.han.jefmk.levels.LevelBuilder;
 import nl.han.jefmk.levels.LevelLoader;
 import nl.han.jefmk.levels.LevelRegistry;
 import nl.han.jefmk.levels.model.*;
-import nl.han.jefmk.levels.registration.MobRegistrar;
-import nl.han.jefmk.levels.registration.ObstacleRegistrar;
-import nl.han.jefmk.levels.registration.PickupRegistrar;
-import nl.han.jefmk.levels.registration.TileRegistrar;
+import nl.han.jefmk.levels.registration.*;
 
 import java.io.IOException;
 import java.nio.file.Files;

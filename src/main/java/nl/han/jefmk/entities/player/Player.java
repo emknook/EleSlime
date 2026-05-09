@@ -52,6 +52,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     private PlayerSprite playerSprite;
     private final Coordinate2D spawn;
+    private boolean isTakingKnockback;
     private final GameScene level;
 
     public Player(final Coordinate2D initialLocation, int initialHealth, GameScene level) {
@@ -111,6 +112,13 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     private void handleHorizontalSurfaceMovement(final Set<KeyCode> pressedKeys) {
         horizontalSpeed = 0;
+
+        if(isTakingKnockback) {
+            isTakingKnockback = false;
+        } else {
+            verticalSpeed = 0;
+        }
+
         if (pressedKeys.contains(KeyCode.LEFT) || pressedKeys.contains(KeyCode.A)) {
             horizontalSpeed = -SURFACE_MOVEMENT_SPEED;
         } else if (pressedKeys.contains(KeyCode.RIGHT)  || pressedKeys.contains(KeyCode.D)) {
@@ -159,6 +167,14 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     public void addTouchingSurfaceDirection(Direction direction) {
         touchingSurfaceDirections.add(direction);
+    }
+
+    public double getBodyWidth() {
+        return EleSlime.MOB_SIZE;
+    }
+
+    public double getBodyHeight() {
+        return EleSlime.MOB_SIZE;
     }
 
     public boolean isFalling() {
@@ -374,6 +390,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         
         // Vertical knockback: throw upward at jump speed
         verticalSpeed = -JUMP_SPEED;
+        isTakingKnockback = true;
         
         // Clear attached surface so player enters air state and gravity applies
         attachedSurfaceDirection = null;

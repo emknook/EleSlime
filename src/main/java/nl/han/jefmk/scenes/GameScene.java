@@ -13,6 +13,7 @@ import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.entities.decorational.HealthDisplay;
 import nl.han.jefmk.entities.decorational.ScoreDisplay;
 import nl.han.jefmk.entities.mobs.EnemySlime;
+import nl.han.jefmk.entities.pickups.WinFlag;
 import nl.han.jefmk.entities.player.Player;
 import nl.han.jefmk.entities.projectiles.Lightning;
 import nl.han.jefmk.levels.LevelBuilder;
@@ -59,6 +60,13 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
         LevelBuilder builder = new LevelBuilder(registry);
 
         LevelData data = loader.load(levelName);
+        builder.buildFromData(data, (entry, entity) -> addEntity(entity), this::addEntity);
+
+        // Register win_flag with the win callback before building the level.
+        // This overrides the null placeholder registered in PickupRegistrar.
+        registry.register("win_flag", location ->
+                new WinFlag(location, () -> javafx.application.Platform.runLater(switchToEditor)));
+
         double tileSize = data.getTileSize();
         // Expand the world to fit every placed tile and pickup so nothing is clipped on load
         for (TileEntry tile : data.getTiles()) {
@@ -82,13 +90,15 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
             });
 
             if (EleSlime.DEBUG) {
-                TextEntity debugOverlay = new TextEntity(new Coordinate2D(10, 10));
+                TextEntity debugOverlay = new TextEntity(new Coordinate2D(10, 80));
                 debugOverlay.setFont(Font.font("Monospaced", FontWeight.BOLD, 12));
                 debugOverlay.setFill(Color.LIME);
                 addEntity(debugOverlay, true);
                 player.setDebugListener(debugOverlay::setText);
             }
             addEntity(player);
+
+
             registry.register("enemy_slime", location -> new EnemySlime(location, player));
         }
         builder.buildFromData(data, (entry, entity) -> addEntity(entity), this::addEntity);

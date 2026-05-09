@@ -66,7 +66,7 @@ public class PlayerCollider extends CircleEntity implements Collided {
                 player.setAnchorLocationY(owner.getAnchorLocation().getY() + owner.getHeight());
                 break;
             case Direction.DOWN:
-                player.setAnchorLocationY(owner.getAnchorLocation().getY() - player.getHeight());
+                player.setAnchorLocationY(owner.getAnchorLocation().getY() - player.getBodyHeight());
                 if (player.isFalling()) {
                     player.endKnockback();
                 }
@@ -75,7 +75,7 @@ public class PlayerCollider extends CircleEntity implements Collided {
                 player.setAnchorLocationX(owner.getAnchorLocation().getX() + owner.getWidth());
                 break;
             case Direction.RIGHT:
-                player.setAnchorLocationX(owner.getAnchorLocation().getX() - player.getWidth());
+                player.setAnchorLocationX(owner.getAnchorLocation().getX() - player.getBodyWidth());
                 break;
         }
     }

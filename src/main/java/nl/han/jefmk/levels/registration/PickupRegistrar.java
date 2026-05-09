@@ -2,6 +2,7 @@ package nl.han.jefmk.levels.registration;
 
 import nl.han.jefmk.entities.pickups.BlueShroom;
 import nl.han.jefmk.entities.pickups.GreenShroom;
+import nl.han.jefmk.entities.pickups.WinFlag;
 import nl.han.jefmk.levels.EntitySupplier;
 import nl.han.jefmk.levels.LevelRegistry;
 
@@ -11,7 +12,8 @@ public class PickupRegistrar {
 
     private static final List<PickupDefinition> PICKUP_DEFINITIONS = List.of(
             new PickupDefinition("blue_shroom", "sprites/blue-shroom.png", BlueShroom::new),
-            new PickupDefinition("green_shroom", "sprites/green-shroom.png", GreenShroom::new)
+            new PickupDefinition("green_shroom", "sprites/green-shroom.png", GreenShroom::new),
+            new PickupDefinition("win_flag", "sprites/win-pole.png", loc -> new WinFlag(loc, () -> {}))
     );
 
     private static final List<String> TYPE_IDS = PICKUP_DEFINITIONS.stream()

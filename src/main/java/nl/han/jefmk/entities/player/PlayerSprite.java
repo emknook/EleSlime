@@ -39,6 +39,8 @@ public class PlayerSprite extends DynamicSpriteEntity {
     }
 
     public void setIdle() {
+        setAutoCycle(300);
+
         switch (movingState) {
             case MOVING_RIGHT, IDLE_RIGHT, JUMPING_RIGHT -> idleRight();
             case MOVING_LEFT, IDLE_LEFT, JUMPING_LEFT   -> idleLeft();
@@ -47,14 +49,12 @@ public class PlayerSprite extends DynamicSpriteEntity {
 
     public void idleLeft() {
         if (movingState == MovingState.IDLE_LEFT) return;
-        setAutoCycle(300);
         playAnimation(idleLeftAnimation);
         movingState = MovingState.IDLE_LEFT;
     }
 
     public void idleRight() {
         if (movingState == MovingState.IDLE_RIGHT) return;
-        setAutoCycle(300);
         playAnimation(idleRightAnimation);
         movingState = MovingState.IDLE_RIGHT;
     }
