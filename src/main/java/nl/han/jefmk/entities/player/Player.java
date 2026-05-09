@@ -29,7 +29,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private static final double GRAVITY = 2880d;               // px/s²
     private static final double MAX_DELTA = 1.0 / 20.0;       // clamp to 20 fps minimum
     private static final double STICKY_RADIUS_MULTIPLIER = 1.04d;
-    private static final double SPRITE_COLLIDER_BOTTOM_OFFSET = 0d;
+    private static final double SPRITE_COLLIDER_BOTTOM_OFFSET = 7d;
 
     private long lastTimestamp = -1;
 
