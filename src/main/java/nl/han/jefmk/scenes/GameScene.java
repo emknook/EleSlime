@@ -34,12 +34,24 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
 
     private final String levelName;
     private final BiConsumer<String, Integer> onLevelCompleted;
+    private final Runnable onPlayerDeath;
     private final Set<KeyCode> previousKeys = new HashSet<>();
     private Coordinate2D spawnWorldPos = null;
 
     public GameScene(String levelName, BiConsumer<String, Integer> onLevelCompleted) {
+        this(levelName, onLevelCompleted, null);
+    }
+
+    public GameScene(String levelName, BiConsumer<String, Integer> onLevelCompleted, Runnable onPlayerDeath) {
         this.levelName = levelName;
         this.onLevelCompleted = onLevelCompleted;
+        this.onPlayerDeath = onPlayerDeath;
+    }
+
+    public void handlePlayerDeath() {
+        if (onPlayerDeath != null) {
+            javafx.application.Platform.runLater(onPlayerDeath);
+        }
     }
 
     private static final int WORLD_MARGIN = 2000;
@@ -83,7 +95,7 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
             );
             expandWorldIfNeeded(spawnWorldPos.getX(), spawnWorldPos.getY());
             Player player = new Player(spawnWorldPos, 3, this);
-            addEntity(new HealthDisplay(new Coordinate2D(getViewportWidth() - 80, 35), player), true);
+            addEntity(new HealthDisplay(new Coordinate2D(10, 3), player), true);
             player.setPositionListener(pos -> {
                 expandWorldIfNeeded(pos.getX(), pos.getY());
                 updateCameraPosition(pos);

@@ -216,6 +216,8 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
             verticalSpeed = 0;
             horizontalSpeed = 0;
+
+            level.handlePlayerDeath();
         }
     }
 
