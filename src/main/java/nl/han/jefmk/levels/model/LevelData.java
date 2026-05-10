@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LevelData {
+
     private String name;
     private double tileSize;
     private SpawnPoint spawn;
+    private List<Integer> highScores = new ArrayList<>();
     private List<TileEntry> tiles = new ArrayList<>();
     private List<PickupEntry> pickups = new ArrayList<>();
     private List<TextEntry> texts = new ArrayList<>();
@@ -40,6 +42,14 @@ public class LevelData {
         this.spawn = spawn;
     }
 
+    public List<Integer> getHighScores() {
+        return highScores;
+    }
+
+    public void setHighScores(List<Integer> highScores) {
+        this.highScores = highScores != null ? highScores : new ArrayList<>();
+    }
+
     public List<TileEntry> getTiles() {
         return tiles;
     }
@@ -64,11 +74,19 @@ public class LevelData {
         this.texts = texts;
     }
 
-    public List<MobEntry> getMobs() { return mobs; }
+    public List<MobEntry> getMobs() {
+        return mobs;
+    }
 
-    public void setMobs(List<MobEntry> mobs) { this.mobs = mobs; }
+    public void setMobs(List<MobEntry> mobs) {
+        this.mobs = mobs;
+    }
 
-    public List<ObstacleEntry> getObstacles() { return obstacles; }
+    public List<ObstacleEntry> getObstacles() {
+        return obstacles;
+    }
 
-    public void setObstacles(List<ObstacleEntry> obstacles) { this.obstacles = obstacles; }
+    public void setObstacles(List<ObstacleEntry> obstacles) {
+        this.obstacles = obstacles;
+    }
 }

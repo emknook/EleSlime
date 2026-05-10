@@ -1,0 +1,287 @@
+{
+  "name": "The fri[End]",
+  "tileSize": 100.0,
+  "spawn": {
+    "gridX": 6,
+    "gridY": -31
+  },
+  "tiles": [
+    {
+      "gridX": 7,
+      "gridY": -28,
+      "type": "floor"
+    },
+    {
+      "gridX": 8,
+      "gridY": -28,
+      "type": "floor"
+    },
+    {
+      "gridX": 9,
+      "gridY": -28,
+      "type": "floor"
+    },
+    {
+      "gridX": 10,
+      "gridY": -28,
+      "type": "floor"
+    },
+    {
+      "gridX": 11,
+      "gridY": -28,
+      "type": "floor"
+    },
+    {
+      "gridX": 6,
+      "gridY": -28,
+      "type": "corner_top_left"
+    },
+    {
+      "gridX": 12,
+      "gridY": -28,
+      "type": "corner_top_right"
+    },
+    {
+      "gridX": 12,
+      "gridY": -27,
+      "type": "corner_bottom_right"
+    },
+    {
+      "gridX": 6,
+      "gridY": -27,
+      "type": "corner_bottom_left"
+    },
+    {
+      "gridX": 7,
+      "gridY": -27,
+      "type": "ceiling"
+    },
+    {
+      "gridX": 8,
+      "gridY": -27,
+      "type": "ceiling"
+    },
+    {
+      "gridX": 9,
+      "gridY": -27,
+      "type": "ceiling"
+    },
+    {
+      "gridX": 10,
+      "gridY": -27,
+      "type": "ceiling"
+    },
+    {
+      "gridX": 11,
+      "gridY": -27,
+      "type": "ceiling"
+    },
+    {
+      "gridX": 4,
+      "gridY": -31,
+      "type": "wall_left"
+    },
+    {
+      "gridX": 4,
+      "gridY": -30,
+      "type": "wall_left"
+    },
+    {
+      "gridX": 4,
+      "gridY": -29,
+      "type": "wall_left"
+    },
+    {
+      "gridX": 4,
+      "gridY": -27,
+      "type": "wall_left"
+    },
+    {
+      "gridX": 4,
+      "gridY": -28,
+      "type": "wall_left"
+    },
+    {
+      "gridX": 4,
+      "gridY": -26,
+      "type": "wall_left"
+    },
+    {
+      "gridX": 4,
+      "gridY": -25,
+      "type": "wall_left"
+    },
+    {
+      "gridX": 4,
+      "gridY": -24,
+      "type": "inner_corner_bottom_left"
+    },
+    {
+      "gridX": 5,
+      "gridY": -24,
+      "type": "floor"
+    },
+    {
+      "gridX": 6,
+      "gridY": -24,
+      "type": "floor"
+    },
+    {
+      "gridX": 7,
+      "gridY": -24,
+      "type": "floor"
+    },
+    {
+      "gridX": 8,
+      "gridY": -24,
+      "type": "floor"
+    },
+    {
+      "gridX": 9,
+      "gridY": -24,
+      "type": "floor"
+    },
+    {
+      "gridX": 11,
+      "gridY": -24,
+      "type": "floor"
+    },
+    {
+      "gridX": 10,
+      "gridY": -24,
+      "type": "floor"
+    },
+    {
+      "gridX": 13,
+      "gridY": -24,
+      "type": "floor"
+    },
+    {
+      "gridX": 12,
+      "gridY": -24,
+      "type": "floor"
+    },
+    {
+      "gridX": 14,
+      "gridY": -24,
+      "type": "inner_corner_bottom_right"
+    },
+    {
+      "gridX": 14,
+      "gridY": -25,
+      "type": "wall_right"
+    },
+    {
+      "gridX": 14,
+      "gridY": -26,
+      "type": "wall_right"
+    },
+    {
+      "gridX": 14,
+      "gridY": -27,
+      "type": "wall_right"
+    },
+    {
+      "gridX": 14,
+      "gridY": -28,
+      "type": "wall_right"
+    },
+    {
+      "gridX": 14,
+      "gridY": -29,
+      "type": "wall_right"
+    },
+    {
+      "gridX": 14,
+      "gridY": -30,
+      "type": "wall_right"
+    },
+    {
+      "gridX": 14,
+      "gridY": -31,
+      "type": "wall_right"
+    },
+    {
+      "gridX": 14,
+      "gridY": -32,
+      "type": "wall_right"
+    },
+    {
+      "gridX": 4,
+      "gridY": -32,
+      "type": "wall_left"
+    },
+    {
+      "gridX": 4,
+      "gridY": -33,
+      "type": "inner_corner_top_left"
+    },
+    {
+      "gridX": 14,
+      "gridY": -33,
+      "type": "inner_corner_top_right"
+    },
+    {
+      "gridX": 13,
+      "gridY": -33,
+      "type": "ceiling"
+    },
+    {
+      "gridX": 12,
+      "gridY": -33,
+      "type": "ceiling"
+    },
+    {
+      "gridX": 11,
+      "gridY": -33,
+      "type": "ceiling"
+    },
+    {
+      "gridX": 10,
+      "gridY": -33,
+      "type": "ceiling"
+    },
+    {
+      "gridX": 9,
+      "gridY": -33,
+      "type": "ceiling"
+    },
+    {
+      "gridX": 8,
+      "gridY": -33,
+      "type": "ceiling"
+    },
+    {
+      "gridX": 6,
+      "gridY": -33,
+      "type": "ceiling"
+    },
+    {
+      "gridX": 5,
+      "gridY": -33,
+      "type": "ceiling"
+    },
+    {
+      "gridX": 7,
+      "gridY": -33,
+      "type": "ceiling"
+    }
+  ],
+  "pickups": [],
+  "texts": [
+    {
+      "gridX": 11,
+      "gridY": -30,
+      "text": "Fri[End]!"
+    }
+  ],
+  "mobs": [
+    {
+      "config": {},
+      "gridX": 11,
+      "gridY": -29,
+      "type": "friend_slime"
+    }
+  ],
+  "obstacles": []
+}

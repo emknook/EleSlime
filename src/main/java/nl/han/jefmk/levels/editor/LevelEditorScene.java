@@ -34,6 +34,7 @@ import java.util.*;
 
 public class LevelEditorScene extends ScrollableDynamicScene implements MouseButtonPressedListener, MouseMovedListener {
 
+    private static final int MAX_HIGH_SCORES = 10;
     private static final double TILE_SIZE = EleSlime.TILE_SIZE;
     private static final List<String> TILE_TYPE_IDS = TileRegistrar.getTypeIds();
     private static final List<String> PICKUP_TYPE_IDS = PickupRegistrar.getTypeIds();
@@ -42,6 +43,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     private static final List<String> MOB_GHOST_SPRITES = MobRegistrar.getSpriteResources();
     private static final List<String> OBSTACLE_TYPE_IDS = ObstacleRegistrar.getTypeIds();
     private static final List<String> OBSTACLE_GHOST_SPRITES = ObstacleRegistrar.getSpriteResources();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private EditorMode mode = EditorMode.TILES;
     private int currentTileIndex = 0;
@@ -57,6 +59,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     private final List<TextEntry> textEntries = new ArrayList<>();
     private final List<MobEntry> mobEntries = new ArrayList<>();
     private final List<ObstacleEntry> obstacleEntries = new ArrayList<>();
+    private final List<Integer> highScores = new ArrayList<>();
     private SpawnPoint spawn = new SpawnPoint(1, 1);
     private PlayerSprite spawnMarker;
 
@@ -73,7 +76,6 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     private final Runnable switchBack;
     private final LevelLoader loader = new LevelLoader();
     private final LevelBuilder levelBuilder = new LevelBuilder(LevelRegistry.getInstance());
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private String displayName;
 
     public LevelEditorScene(String levelName, Runnable switchBack) {
@@ -193,6 +195,9 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
             }
             if (data.getSpawn() != null) {
                 spawn = data.getSpawn();
+            }
+            if (data.getHighScores() != null) {
+                highScores.addAll(data.getHighScores());
             }
         } catch (IllegalArgumentException e) {
             // No existing level — start fresh
@@ -577,29 +582,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     // --- Save ---
 
     private void saveLevel() {
-        String json = gson.toJson(toLevelData());
-
-        String relativePath = String.join("/", "levels", levelName + ".json");
-
-        // Write to source resources (for permanent storage)
-        try {
-            Path srcPath = Path.of("src/main/resources", relativePath);
-            Files.createDirectories(srcPath.getParent());
-            Files.writeString(srcPath, json);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save level to src: " + e.getMessage(), e);
-        }
-
-        // Also write to the classpath location so the game can load it immediately
-        try {
-            java.net.URL url = getClass().getClassLoader().getResource("levels");
-            if (url != null) {
-                Path classpathDir = Path.of(url.toURI());
-                Files.writeString(classpathDir.resolve(levelName + ".json"), json);
-            }
-        } catch (Exception e) {
-            // Classpath write failed (e.g. inside a jar) — src copy is still saved
-        }
+        saveLevelData(levelName, toLevelData());
     }
 
     private LevelData toLevelData() {
@@ -612,6 +595,7 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
         data.setMobs(new ArrayList<>(mobEntries));
         data.setObstacles(new ArrayList<>(obstacleEntries));
         data.setTexts(new ArrayList<>(textEntries));
+        data.setHighScores(new ArrayList<>(highScores));
         return data;
     }
 
@@ -643,5 +627,55 @@ public class LevelEditorScene extends ScrollableDynamicScene implements MouseBut
     // Spawn marker/ghost is displayed one tile above the stored grid row so it sits on top of the floor.
     private Coordinate2D spawnDisplayPixel(int gridX, int gridY) {
         return new Coordinate2D(gridX * TILE_SIZE, EleSlime.Y_OFFSET + (gridY - 1) * TILE_SIZE);
+    }
+
+    private static void saveLevelData(String levelName, LevelData data) {
+        String json = GSON.toJson(data);
+
+        String relativePath = String.join("/", "levels", levelName + ".json");
+
+        try {
+            Path srcPath = Path.of("src/main/resources", relativePath);
+            Files.createDirectories(srcPath.getParent());
+            Files.writeString(srcPath, json);
+        } catch (IOException exception) {
+            throw new RuntimeException("Failed to save level to src: " + exception.getMessage(), exception);
+        }
+
+        try {
+            java.net.URL url = LevelEditorScene.class.getClassLoader().getResource("levels");
+
+            if (url != null) {
+                Path classpathDir = Path.of(url.toURI());
+                Files.writeString(classpathDir.resolve(levelName + ".json"), json);
+            }
+        } catch (Exception exception) {
+            // Classpath write failed, source copy is still saved.
+        }
+    }
+
+    public static void registerHighScore(String levelName, int score) {
+        LevelLoader loader = new LevelLoader();
+        LevelData data = loader.load(levelName);
+
+        List<Integer> highScores = new ArrayList<>(data.getHighScores());
+        highScores.sort((leftScore, rightScore) -> Integer.compare(rightScore, leftScore));
+
+        boolean scoreIsHighEnough = highScores.size() < MAX_HIGH_SCORES
+                || score > highScores.get(MAX_HIGH_SCORES - 1);
+
+        if (!scoreIsHighEnough) {
+            return;
+        }
+
+        highScores.add(score);
+        highScores.sort((leftScore, rightScore) -> Integer.compare(rightScore, leftScore));
+
+        if (highScores.size() > MAX_HIGH_SCORES) {
+            highScores = new ArrayList<>(highScores.subList(0, MAX_HIGH_SCORES));
+        }
+
+        data.setHighScores(highScores);
+        saveLevelData(levelName, data);
     }
 }

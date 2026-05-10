@@ -26,19 +26,20 @@ import nl.han.jefmk.levels.model.TileEntry;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 public class GameScene extends ScrollableDynamicScene implements KeyListener {
 
     private static final double DEAD_ZONE_FRACTION = 0.30;
 
     private final String levelName;
-    private final Runnable switchToEditor;
+    private final BiConsumer<String, Integer> onLevelCompleted;
     private final Set<KeyCode> previousKeys = new HashSet<>();
     private Coordinate2D spawnWorldPos = null;
 
-    public GameScene(String levelName, Runnable switchToEditor) {
+    public GameScene(String levelName, BiConsumer<String, Integer> onLevelCompleted) {
         this.levelName = levelName;
-        this.switchToEditor = switchToEditor;
+        this.onLevelCompleted = onLevelCompleted;
     }
 
     private static final int WORLD_MARGIN = 2000;
@@ -60,12 +61,11 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
         LevelBuilder builder = new LevelBuilder(registry);
 
         LevelData data = loader.load(levelName);
-        builder.buildFromData(data, (entry, entity) -> addEntity(entity), this::addEntity);
 
         // Register win_flag with the win callback before building the level.
         // This overrides the null placeholder registered in PickupRegistrar.
         registry.register("win_flag", location ->
-                new WinFlag(location, () -> javafx.application.Platform.runLater(switchToEditor)));
+                new WinFlag(location, () -> javafx.application.Platform.runLater(this::completeLevel)));
 
         double tileSize = data.getTileSize();
         // Expand the world to fit every placed tile and pickup so nothing is clipped on load
@@ -193,6 +193,11 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
         }
     }
 
+    private void completeLevel() {
+        int score = Score.getInstance().getScore();
+        onLevelCompleted.accept(levelName, score);
+    }
+
     @Override
     public void onPressedKeysChange(Set<KeyCode> pressedKeys) {
         Set<KeyCode> freshKeys = new HashSet<>(pressedKeys);
@@ -201,7 +206,7 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
         previousKeys.addAll(pressedKeys);
 
         if (freshKeys.contains(KeyCode.F1)) {
-            javafx.application.Platform.runLater(switchToEditor::run);
+            javafx.application.Platform.runLater(this::completeLevel);
         }
     }
 }

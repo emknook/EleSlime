@@ -3,24 +3,36 @@ package nl.han.jefmk;
 import com.github.hanyaeger.api.Size;
 import com.github.hanyaeger.api.YaegerGame;
 import javafx.application.Platform;
-
 import nl.han.jefmk.levels.LevelRegistry;
+import nl.han.jefmk.levels.editor.LevelEditorScene;
+import nl.han.jefmk.levels.editor.LevelSelectScene;
 import nl.han.jefmk.levels.registration.MobRegistrar;
 import nl.han.jefmk.levels.registration.ObstacleRegistrar;
 import nl.han.jefmk.levels.registration.PickupRegistrar;
 import nl.han.jefmk.levels.registration.TileRegistrar;
 import nl.han.jefmk.scenes.GameScene;
-import nl.han.jefmk.levels.editor.LevelEditorScene;
-import nl.han.jefmk.levels.editor.LevelSelectScene;
 
 public class EleSlime extends YaegerGame {
 
-    public final static boolean DEBUG = false;
-    public final static double TILE_SIZE = 100;
-    public final static double MOB_SIZE = 80;
+    public static final boolean DEBUG = false;
 
-    // Used to roughly offset the world so we have more space above
-    public final static int Y_OFFSET = 6000;
+    public static final double TILE_SIZE = 100;
+    public static final double MOB_SIZE = 80;
+
+    public static final int Y_OFFSET = 6000;
+
+    private static final int LEVEL_SELECT_SCENE_ID = 0;
+    private static final int GAME_SCENE_ID = 1;
+    private static final int LEVEL_EDITOR_SCENE_ID = 2;
+
+    private static final String EDIT_PREFIX = "edit:";
+
+    private static final String[] LEVEL_ORDER = {
+            "lvl_1",
+            "lvl_2",
+            "lvl_3",
+            "lvl_end"
+    };
 
     public static void main(String[] args) {
         launch(args);
@@ -31,6 +43,7 @@ public class EleSlime extends YaegerGame {
         setSize(new Size(1366, 768));
 
         LevelRegistry registry = LevelRegistry.getInstance();
+
         TileRegistrar.registerAll(registry);
         PickupRegistrar.registerAll(registry);
         MobRegistrar.registerAll(registry);
@@ -39,18 +52,83 @@ public class EleSlime extends YaegerGame {
 
     @Override
     public void setupScenes() {
-        addScene(0, new LevelSelectScene(selection -> {
-            // Using JavaFX Platform.runLater() so it runs after everything is done iterating and java doesn't get mad.
-            Platform.runLater(() -> {
-                if (selection.startsWith("edit:")) {
-                    String levelName = selection.substring(5);
-                    addScene(2, new LevelEditorScene(levelName, () -> setActiveScene(0)));
-                    setActiveScene(2);
-                } else {
-                    addScene(1, new GameScene(selection, () -> setActiveScene(0)));
-                    setActiveScene(1);
-                }
-            });
-        }));
+        if (DEBUG) {
+            setupDebugScenes();
+            return;
+        }
+
+        setupPlayScenes();
+    }
+
+    private void setupDebugScenes() {
+        addScene(LEVEL_SELECT_SCENE_ID, new LevelSelectScene(selection -> Platform.runLater(() -> handleDebugLevelSelection(selection))));
+
+        setActiveScene(LEVEL_SELECT_SCENE_ID);
+    }
+
+    private void setupPlayScenes() {
+        loadGameScene(LEVEL_ORDER[0]);
+    }
+
+    private void handleDebugLevelSelection(String selection) {
+        if (selection.startsWith(EDIT_PREFIX)) {
+            String levelName = selection.substring(EDIT_PREFIX.length());
+
+            addScene(
+                    LEVEL_EDITOR_SCENE_ID,
+                    new LevelEditorScene(levelName, () -> setActiveScene(LEVEL_SELECT_SCENE_ID))
+            );
+
+            setActiveScene(LEVEL_EDITOR_SCENE_ID);
+            return;
+        }
+
+        addScene(
+                GAME_SCENE_ID,
+                new GameScene(selection, this::handleLevelCompletedInDebugMode)
+        );
+
+        setActiveScene(GAME_SCENE_ID);
+    }
+
+    private void loadGameScene(String levelName) {
+        addScene(
+                GAME_SCENE_ID,
+                new GameScene(levelName, this::handleLevelCompletedInPlayMode)
+        );
+
+        setActiveScene(GAME_SCENE_ID);
+    }
+
+    private String getNextLevelName(String completedLevelName) {
+        for (int levelIndex = 0; levelIndex < LEVEL_ORDER.length - 1; levelIndex++) {
+            if (LEVEL_ORDER[levelIndex].equals(completedLevelName)) {
+                return LEVEL_ORDER[levelIndex + 1];
+            }
+        }
+
+        return null;
+    }
+
+    private void handleFinalLevelCompleted() {
+        loadGameScene(LEVEL_ORDER[0]);
+    }
+
+    private void handleLevelCompletedInDebugMode(String completedLevelName, int score) {
+        LevelEditorScene.registerHighScore(completedLevelName, score);
+        setActiveScene(LEVEL_SELECT_SCENE_ID);
+    }
+
+    private void handleLevelCompletedInPlayMode(String completedLevelName, int score) {
+        LevelEditorScene.registerHighScore(completedLevelName, score);
+
+        String nextLevelName = getNextLevelName(completedLevelName);
+
+        if (nextLevelName == null) {
+            handleFinalLevelCompleted();
+            return;
+        }
+
+        loadGameScene(nextLevelName);
     }
 }
