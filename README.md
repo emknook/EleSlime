@@ -74,12 +74,9 @@ Zet terug op `false` voor normaal spel.
 
 ## Over dit project
 
-Dit project is een **beroepsproduct** voor de opleiding **HBO-ICT Software Development** aan Hogeschool Utrecht.
+Dit project is een **beroepsproduct** voor de opleiding **HBO-ICT SD** aan HAN Arnhem.
 
 Het demonstreert kernvaardigheden in:
 - Object-georiënteerd programmeren (Java)
 - Game design en development
 - Architectuur en code organisatie
-- Maven build management
-- JSON-configuratie
-- Collision detection en physics simulatie
