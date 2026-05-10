@@ -211,6 +211,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     private void checkForDeath() {
         if (health.get() <= 0) {
             Score.getInstance().resetForDeath();
+            health.resetForDeath();
             this.setAnchorLocation(new Coordinate2D(spawn.getX(), spawn.getY() - this.getHeight()));
 
             verticalSpeed = 0;

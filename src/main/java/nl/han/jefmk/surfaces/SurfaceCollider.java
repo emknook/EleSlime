@@ -40,6 +40,8 @@ public class SurfaceCollider extends RectangleEntity implements Collider {
         switch(surfaceDirection) {
             case LEFT -> setAnchorLocationX(initialLocation.getX() + EleSlime.TILE_SIZE);
             case UP -> setAnchorLocationY(initialLocation.getY() + EleSlime.TILE_SIZE);
+            case DOWN -> setAnchorLocationY(initialLocation.getY() - 2);
+            case RIGHT ->  setAnchorLocationX(initialLocation.getX() - 2);
         }
         switch (surfaceDirection) {
             case UP, DOWN -> setAnchorLocationX(this.getAnchorLocation().getX() + collisionMargin / 2);

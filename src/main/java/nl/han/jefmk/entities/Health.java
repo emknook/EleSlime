@@ -10,6 +10,8 @@ public class Health {
     private static final long DEFAULT_REGAIN_COOLDOWN_NS = 500_000_000L;   // 0.5 s
 
     private int value;
+    private final int initialHealth;
+
     private final List<Consumer<Integer>> listeners = new ArrayList<>();
 
     private final long damageCooldownNs;
@@ -23,6 +25,7 @@ public class Health {
 
     public Health(int initialHealth, long damageCooldownNs, long regainCooldownNs) {
         this.value = initialHealth;
+        this.initialHealth = initialHealth;
         this.damageCooldownNs = damageCooldownNs;
         this.regainCooldownNs = regainCooldownNs;
         long now = System.nanoTime();
@@ -38,6 +41,13 @@ public class Health {
         return System.nanoTime() - lastDamageTime >= damageCooldownNs;
     }
 
+    /**
+     *
+     */
+    public void resetForDeath() {
+        this.value = initialHealth;
+    }
+
     /** Applies damage only if the damage cooldown has elapsed. Returns {@code true} if damage was applied. */
     public boolean damage() {
         if (!canTakeDamage()) return false;
@@ -49,12 +59,11 @@ public class Health {
     }
 
     /** Applies health gain only if the regain cooldown has elapsed. Returns {@code true} if health was applied. */
-    public boolean regain() {
-        if (System.nanoTime() - lastRegainTime < regainCooldownNs) return false;
+    public void regain() {
+        if (System.nanoTime() - lastRegainTime < regainCooldownNs) return;
         lastRegainTime = System.nanoTime();
         value++;
         notifyListeners();
-        return true;
     }
 
     public void addListener(Consumer<Integer> listener) {
