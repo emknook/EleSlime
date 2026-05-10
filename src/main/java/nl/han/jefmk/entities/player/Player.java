@@ -102,10 +102,26 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         currentPressedKeys.addAll(pressedKeys);
     }
 
+    private boolean isLeftPressed(final Set<KeyCode> keys) {
+        return keys.contains(KeyCode.LEFT) || keys.contains(KeyCode.A);
+    }
+
+    private boolean isRightPressed(final Set<KeyCode> keys) {
+        return keys.contains(KeyCode.RIGHT) || keys.contains(KeyCode.D);
+    }
+
+    private boolean isUpPressed(final Set<KeyCode> keys) {
+        return keys.contains(KeyCode.UP) || keys.contains(KeyCode.W);
+    }
+
+    private boolean isDownPressed(final Set<KeyCode> keys) {
+        return keys.contains(KeyCode.DOWN) || keys.contains(KeyCode.S);
+    }
+
     private void handleAirMovement(final Set<KeyCode> pressedKeys) {
-        if (pressedKeys.contains(KeyCode.LEFT)) {
+        if (isLeftPressed(pressedKeys)) {
             horizontalSpeed = Math.max(horizontalSpeed - AIR_MOVEMENT_SPEED * 0.15, -AIR_MOVEMENT_SPEED);
-        } else if (pressedKeys.contains(KeyCode.RIGHT)) {
+        } else if (isRightPressed(pressedKeys)) {
             horizontalSpeed = Math.min(horizontalSpeed + AIR_MOVEMENT_SPEED * 0.15, AIR_MOVEMENT_SPEED);
         }
     }
@@ -119,18 +135,18 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
             verticalSpeed = 0;
         }
 
-        if (pressedKeys.contains(KeyCode.LEFT) || pressedKeys.contains(KeyCode.A)) {
+        if (isLeftPressed(pressedKeys)) {
             horizontalSpeed = -SURFACE_MOVEMENT_SPEED;
-        } else if (pressedKeys.contains(KeyCode.RIGHT)  || pressedKeys.contains(KeyCode.D)) {
+        } else if (isRightPressed(pressedKeys)) {
             horizontalSpeed = SURFACE_MOVEMENT_SPEED;
         }
     }
 
     private void handleVerticalSurfaceMovement(final Set<KeyCode> pressedKeys) {
         verticalSpeed = 0;
-        if (pressedKeys.contains(KeyCode.UP) || pressedKeys.contains(KeyCode.W)) {
+        if (isUpPressed(pressedKeys)) {
             verticalSpeed = -SURFACE_MOVEMENT_SPEED;
-        } else if (pressedKeys.contains(KeyCode.DOWN) || pressedKeys.contains(KeyCode.S)) {
+        } else if (isDownPressed(pressedKeys)) {
             verticalSpeed = SURFACE_MOVEMENT_SPEED;
         }
         horizontalSpeed = 0;
@@ -219,11 +235,22 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     public void updateAttachedSurface() {
         Direction previousAttached = attachedSurfaceDirection;
-        if (touchingSurfaceDirections.contains(Direction.LEFT) && (currentPressedKeys.contains(KeyCode.LEFT) || attachedSurfaceDirection == Direction.LEFT) && !currentPressedKeys.contains(KeyCode.RIGHT)) {
+        boolean pressingLeft = isLeftPressed(currentPressedKeys);
+        boolean pressingRight = isRightPressed(currentPressedKeys);
+        boolean pressingUp = isUpPressed(currentPressedKeys);
+        boolean pressingDown = isDownPressed(currentPressedKeys);
+
+        if (touchingSurfaceDirections.contains(Direction.LEFT)
+                && (pressingLeft || attachedSurfaceDirection == Direction.LEFT)
+                && !pressingRight) {
             attachedSurfaceDirection = Direction.LEFT;
-        } else if (touchingSurfaceDirections.contains(Direction.RIGHT) && (currentPressedKeys.contains(KeyCode.RIGHT) || attachedSurfaceDirection == Direction.RIGHT) && !currentPressedKeys.contains(KeyCode.LEFT)) {
+        } else if (touchingSurfaceDirections.contains(Direction.RIGHT)
+                && (pressingRight || attachedSurfaceDirection == Direction.RIGHT)
+                && !pressingLeft) {
             attachedSurfaceDirection = Direction.RIGHT;
-        } else if (touchingSurfaceDirections.contains(Direction.UP) && (currentPressedKeys.contains(KeyCode.UP) || attachedSurfaceDirection == Direction.UP) && !currentPressedKeys.contains(KeyCode.DOWN)) {
+        } else if (touchingSurfaceDirections.contains(Direction.UP)
+                && (pressingUp || attachedSurfaceDirection == Direction.UP)
+                && !pressingDown) {
             attachedSurfaceDirection = Direction.UP;
         } else if (touchingSurfaceDirections.contains(Direction.DOWN)) {
             attachedSurfaceDirection = Direction.DOWN;
@@ -380,10 +407,10 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         double obstacleX = obstacle.getAnchorLocation().getX() + (obstacle.getWidth() / 2);
         double playerX = this.getAnchorLocation().getX();
         
-        if (obstacleX < playerX || currentPressedKeys.contains(KeyCode.RIGHT)) {
+        if (obstacleX < playerX || isRightPressed(currentPressedKeys)) {
             // Obstacle is to the left, knock player right
             horizontalSpeed = AIR_MOVEMENT_SPEED * 1.5;
-        } else if(obstacleX > playerX ||  currentPressedKeys.contains(KeyCode.LEFT)) {
+        } else if(obstacleX > playerX || isLeftPressed(currentPressedKeys)) {
             // Obstacle is to the right, knock player left
             horizontalSpeed = -AIR_MOVEMENT_SPEED * 1.5;
         }
