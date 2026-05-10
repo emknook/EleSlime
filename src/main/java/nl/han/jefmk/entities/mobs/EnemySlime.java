@@ -157,6 +157,7 @@ public class EnemySlime extends Slime implements TimerContainer {
     @Override
     public void onPlayerCollision(Player player) {
         player.takeDamage();
+        player.takeKnockback(this);
     }
 
     public void getHitByLightning() {

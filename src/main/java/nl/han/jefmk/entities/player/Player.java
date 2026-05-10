@@ -5,12 +5,12 @@ import com.github.hanyaeger.api.Size;
 import com.github.hanyaeger.api.entities.Collider;
 import com.github.hanyaeger.api.entities.Direction;
 import com.github.hanyaeger.api.entities.DynamicCompositeEntity;
+import com.github.hanyaeger.api.entities.YaegerEntity;
 import com.github.hanyaeger.api.userinput.KeyListener;
 import javafx.scene.input.KeyCode;
 import nl.han.jefmk.EleSlime;
 import nl.han.jefmk.entities.HasHealth;
 import nl.han.jefmk.entities.Health;
-import nl.han.jefmk.entities.obstacles.Obstacle;
 import nl.han.jefmk.scenes.GameScene;
 import nl.han.jefmk.score.Score;
 import nl.han.jefmk.surfaces.SurfaceOwner;
@@ -403,7 +403,7 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
         }
     }
 
-    public void takeKnockback(Obstacle obstacle) {
+    public void takeKnockback(YaegerEntity obstacle) {
         // Calculate horizontal knockback direction (away from obstacle)
         double obstacleX = obstacle.getAnchorLocation().getX() + (obstacle.getWidth() / 2);
         double playerX = this.getAnchorLocation().getX();
