@@ -83,7 +83,7 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
             );
             expandWorldIfNeeded(spawnWorldPos.getX(), spawnWorldPos.getY());
             Player player = new Player(spawnWorldPos, 3, this);
-            addEntity(new HealthDisplay(new Coordinate2D(getViewportWidth() - 80, 35), player), true);
+            addEntity(new HealthDisplay(new Coordinate2D(10, 3), player), true);
             player.setPositionListener(pos -> {
                 expandWorldIfNeeded(pos.getX(), pos.getY());
                 updateCameraPosition(pos);
