@@ -89,6 +89,8 @@ public class GameScene extends ScrollableDynamicScene implements KeyListener {
                 player.setDebugListener(debugOverlay::setText);
             }
             addEntity(player);
+
+            registry.register("enemy_slime", location -> new EnemySlime(location, player));
         }
     }
 

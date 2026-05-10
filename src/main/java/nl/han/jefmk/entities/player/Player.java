@@ -98,9 +98,9 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
     }
 
     private void handleAirMovement(final Set<KeyCode> pressedKeys) {
-        if (pressedKeys.contains(KeyCode.LEFT)) {
+        if (pressedKeys.contains(KeyCode.LEFT) || pressedKeys.contains(KeyCode.A)) {
             horizontalSpeed = Math.max(horizontalSpeed - AIR_MOVEMENT_SPEED * 0.15, -AIR_MOVEMENT_SPEED);
-        } else if (pressedKeys.contains(KeyCode.RIGHT)) {
+        } else if (pressedKeys.contains(KeyCode.RIGHT) || pressedKeys.contains(KeyCode.D)) {
             horizontalSpeed = Math.min(horizontalSpeed + AIR_MOVEMENT_SPEED * 0.15, AIR_MOVEMENT_SPEED);
         }
     }
@@ -199,11 +199,11 @@ public class Player extends DynamicCompositeEntity implements KeyListener, Colli
 
     public void updateAttachedSurface() {
         Direction previousAttached = attachedSurfaceDirection;
-        if (touchingSurfaceDirections.contains(Direction.LEFT) && (currentPressedKeys.contains(KeyCode.LEFT) || attachedSurfaceDirection == Direction.LEFT) && !currentPressedKeys.contains(KeyCode.RIGHT)) {
+        if (touchingSurfaceDirections.contains(Direction.LEFT) && ((currentPressedKeys.contains(KeyCode.LEFT) || currentPressedKeys.contains(KeyCode.A)) || attachedSurfaceDirection == Direction.LEFT) && !(currentPressedKeys.contains(KeyCode.RIGHT) || currentPressedKeys.contains(KeyCode.D))) {
             attachedSurfaceDirection = Direction.LEFT;
-        } else if (touchingSurfaceDirections.contains(Direction.RIGHT) && (currentPressedKeys.contains(KeyCode.RIGHT) || attachedSurfaceDirection == Direction.RIGHT) && !currentPressedKeys.contains(KeyCode.LEFT)) {
+        } else if (touchingSurfaceDirections.contains(Direction.RIGHT) && ((currentPressedKeys.contains(KeyCode.RIGHT) || currentPressedKeys.contains(KeyCode.D)) || attachedSurfaceDirection == Direction.RIGHT) && !(currentPressedKeys.contains(KeyCode.LEFT) || currentPressedKeys.contains(KeyCode.A))) {
             attachedSurfaceDirection = Direction.RIGHT;
-        } else if (touchingSurfaceDirections.contains(Direction.UP) && (currentPressedKeys.contains(KeyCode.UP) || attachedSurfaceDirection == Direction.UP) && !currentPressedKeys.contains(KeyCode.DOWN)) {
+        } else if (touchingSurfaceDirections.contains(Direction.UP) && ((currentPressedKeys.contains(KeyCode.UP) || currentPressedKeys.contains(KeyCode.W)) || attachedSurfaceDirection == Direction.UP) && !(currentPressedKeys.contains(KeyCode.DOWN) || currentPressedKeys.contains(KeyCode.S))) {
             attachedSurfaceDirection = Direction.UP;
         } else if (touchingSurfaceDirections.contains(Direction.DOWN)) {
             attachedSurfaceDirection = Direction.DOWN;
