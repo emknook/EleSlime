@@ -10,7 +10,9 @@ import nl.han.jefmk.levels.registration.MobRegistrar;
 import nl.han.jefmk.levels.registration.ObstacleRegistrar;
 import nl.han.jefmk.levels.registration.PickupRegistrar;
 import nl.han.jefmk.levels.registration.TileRegistrar;
+import nl.han.jefmk.scenes.DeathScene;
 import nl.han.jefmk.scenes.GameScene;
+import nl.han.jefmk.scenes.MenuScene;
 
 public class EleSlime extends YaegerGame {
 
@@ -21,9 +23,11 @@ public class EleSlime extends YaegerGame {
 
     public static final int Y_OFFSET = 6000;
 
-    private static final int LEVEL_SELECT_SCENE_ID = 0;
+    private static final int MENU_SCENE_ID = 0;
     private static final int GAME_SCENE_ID = 1;
     private static final int LEVEL_EDITOR_SCENE_ID = 2;
+    private static final int LEVEL_SELECT_SCENE_ID = 3;
+    private static final int DEATH_SCENE_ID = 4;
 
     private static final String EDIT_PREFIX = "edit:";
 
@@ -67,7 +71,7 @@ public class EleSlime extends YaegerGame {
     }
 
     private void setupPlayScenes() {
-        loadGameScene(LEVEL_ORDER[0]);
+        loadMenuScene();
     }
 
     private void handleDebugLevelSelection(String selection) {
@@ -91,10 +95,23 @@ public class EleSlime extends YaegerGame {
         setActiveScene(GAME_SCENE_ID);
     }
 
+    private void loadMenuScene() {
+        addScene(MENU_SCENE_ID, new MenuScene(() -> loadGameScene(LEVEL_ORDER[0])));
+        setActiveScene(MENU_SCENE_ID);
+    }
+
+    private void loadDeathScene(String failedLevelName) {
+        addScene(DEATH_SCENE_ID, new DeathScene(
+                () -> loadGameScene(failedLevelName),
+                this::loadMenuScene
+        ));
+        setActiveScene(DEATH_SCENE_ID);
+    }
+
     private void loadGameScene(String levelName) {
         addScene(
                 GAME_SCENE_ID,
-                new GameScene(levelName, this::handleLevelCompletedInPlayMode)
+                new GameScene(levelName, this::handleLevelCompletedInPlayMode, () -> Platform.runLater(() -> loadDeathScene(levelName)))
         );
 
         setActiveScene(GAME_SCENE_ID);
@@ -111,7 +128,7 @@ public class EleSlime extends YaegerGame {
     }
 
     private void handleFinalLevelCompleted() {
-        loadGameScene(LEVEL_ORDER[0]);
+        loadMenuScene();
     }
 
     private void handleLevelCompletedInDebugMode(String completedLevelName, int score) {
