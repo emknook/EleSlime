@@ -10,23 +10,19 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import nl.han.jefmk.score.Score;
 
-/**
- * HUD text entity that displays the current score.
- * Updates every second via a timer and reflects the time-penalty-based score.
- */
 public class ScoreDisplay extends DynamicTextEntity implements TimerContainer {
 
-    public ScoreDisplay(Coordinate2D initialLocation) {
-        super(initialLocation);
+    public ScoreDisplay(Coordinate2D location) {
+        super(location);
         setFont(Font.font("Monospaced", FontWeight.BOLD, 18));
-        setFill(Color.WHITE);
+        setFill(Color.rgb(220, 200, 255));
         setAnchorPoint(AnchorPoint.TOP_RIGHT);
         updateDisplay();
     }
 
     @Override
     public void setupTimers() {
-        addTimer(new Timer(1000) {
+        addTimer(new Timer(200) {
             @Override
             public void onAnimationUpdate(long timestamp) {
                 updateDisplay();
@@ -35,6 +31,7 @@ public class ScoreDisplay extends DynamicTextEntity implements TimerContainer {
     }
 
     private void updateDisplay() {
-        setText("Score: " + Score.getInstance().getScore());
+        setText("SCORE " + Score.getInstance().getScore());
     }
 }
+
